@@ -1,5 +1,6 @@
 package com.loopy.auth.entity;
 
+// Dependencies: @Entity, @Table, @Id, @GeneratedValue, @Column, @ManyToOne, @JoinColumn, @EntityListeners, @CreatedDate — see DEPENDENCY_GUIDE.md
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,19 +22,16 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // Lazy-loaded since we often just need the token string, not the full user
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Random UUID string — not a JWT, just an opaque identifier
     @Column(nullable = false, unique = true)
     private String token;
 
     @Column(name = "expiry_date", nullable = false)
     private Instant expiryDate;
 
-    // Set to true on logout or when rotated during refresh
     @Column(nullable = false)
     private boolean revoked = false;
 

@@ -1,5 +1,6 @@
 package com.loopy.auth.filter;
 
+// Dependencies: @Component, OncePerRequestFilter, FilterChain, SecurityContextHolder, UsernamePasswordAuthenticationToken, WebAuthenticationDetailsSource — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,8 +19,6 @@ import java.io.IOException;
  * Intercepts every HTTP request to check for a JWT in the Authorization header.
  * If a valid token is found, it loads the user and sets the SecurityContext
  * so downstream code (controllers, @AuthenticationPrincipal) can access the user.
- *
- * Extends OncePerRequestFilter to guarantee it runs exactly once per request.
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -36,7 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // Look for "Authorization: Bearer <token>" header
         String authHeader = request.getHeader("Authorization");
 
         // No token — skip authentication, let the request continue (may hit a public endpoint)
@@ -45,18 +43,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Strip "Bearer " prefix to get the raw JWT
         String token = authHeader.substring(7);
 
         try {
             String email = jwtService.extractEmail(token);
 
-            // Only authenticate if no existing auth in context (avoid re-authenticating)
+            // Only authenticate if no one has set the SecurityContext yet
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var userDetails = userDetailsService.loadUserByUsername(email);
 
                 if (jwtService.isTokenValid(token, userDetails)) {
-                    // Set the authenticated user in SecurityContext so controllers can access it
+                    // 3-arg constructor = authenticated token (null credentials since JWT proved identity)
                     var authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -65,7 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception ignored) {
             // Invalid/expired/malformed token — continue without authentication
-            // The request will be rejected by Spring Security if it hits a protected endpoint
         }
 
         filterChain.doFilter(request, response);

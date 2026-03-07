@@ -1,5 +1,6 @@
 package com.loopy.auth.repository;
 
+// Dependencies: JpaRepository, derived query methods — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

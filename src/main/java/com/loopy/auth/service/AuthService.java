@@ -1,5 +1,6 @@
 package com.loopy.auth.service;
 
+// Dependencies: @Service, @Value, @Transactional, PasswordEncoder, AuthenticationManager, UsernamePasswordAuthenticationToken — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.dto.*;
 import com.loopy.auth.entity.RefreshToken;
 import com.loopy.auth.entity.User;
@@ -65,6 +66,7 @@ public class AuthService {
      */
     @Transactional
     public TokenResponse login(LoginRequest request) {
+        // Passes email + raw password to DaoAuthenticationProvider for verification
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 

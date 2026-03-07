@@ -1,5 +1,6 @@
 package com.loopy.auth.repository;
 
+// Dependencies: JpaRepository, @Query, @Modifying — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

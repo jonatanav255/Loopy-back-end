@@ -1,5 +1,6 @@
 package com.loopy.auth.service;
 
+// Dependencies: @Service, @Value, Jwts.builder, Jwts.parser, Claims, Keys.hmacShaKeyFor, SecretKey — see DEPENDENCY_GUIDE.md
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -23,7 +24,6 @@ public class JwtService {
     private final SecretKey signingKey;
     private final long accessExpirationMs;
 
-    // Secret and expiration are injected from application.yml (jwt.secret, jwt.access-expiration-ms)
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-expiration-ms}") long accessExpirationMs) {
@@ -31,10 +31,7 @@ public class JwtService {
         this.accessExpirationMs = accessExpirationMs;
     }
 
-    /**
-     * Creates a signed JWT with the user's email as subject and roles as claims.
-     * The frontend sends this in the Authorization header: "Bearer {token}"
-     */
+    /** Creates a signed JWT with the user's email as subject and roles as claims. */
     public String generateAccessToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())

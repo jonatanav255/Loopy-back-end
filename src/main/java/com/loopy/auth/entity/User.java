@@ -1,5 +1,6 @@
 package com.loopy.auth.entity;
 
+// Dependencies: @Entity, @Table, @Id, @GeneratedValue, @Column, @Enumerated, @ManyToOne, @EntityListeners, @CreatedDate, @LastModifiedDate, UserDetails, GrantedAuthority — see DEPENDENCY_GUIDE.md
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -50,6 +51,9 @@ public class User implements UserDetails {
         this.passwordHash = passwordHash;
     }
 
+    // --- UserDetails interface methods ---
+    // Spring Security calls these during authentication and authorization.
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -60,11 +64,13 @@ public class User implements UserDetails {
         return passwordHash;
     }
 
+    // Returns email as the username — our login identifier
     @Override
     public String getUsername() {
         return email;
     }
 
+    // Account status checks — hardcoded true (not using expiry/locking), except isEnabled() from DB
     @Override
     public boolean isAccountNonExpired() {
         return true;

@@ -1,5 +1,6 @@
 package com.loopy.config;
 
+// Dependencies: @Configuration, @Bean, UserDetailsService, BCryptPasswordEncoder, DaoAuthenticationProvider, AuthenticationManager — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,20 +28,17 @@ public class AppConfig {
         this.userRepository = userRepository;
     }
 
-    /** Tells Spring Security how to load a user by username (email in our case). */
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
-    /** BCrypt password encoder — used for hashing on registration and verifying on login. */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /** Wires together UserDetailsService + PasswordEncoder for Spring Security's auth flow. */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -49,7 +47,6 @@ public class AppConfig {
         return provider;
     }
 
-    /** Exposes the AuthenticationManager bean so AuthService can inject it for login. */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

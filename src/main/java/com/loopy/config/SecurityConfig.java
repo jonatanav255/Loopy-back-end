@@ -1,5 +1,6 @@
 package com.loopy.config;
 
+// Dependencies: @EnableWebSecurity, SecurityFilterChain, HttpSecurity, SessionCreationPolicy — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,19 +39,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                // CSRF disabled — we use JWT tokens, not cookies, for auth
                 .csrf(csrf -> csrf.disable())
-                // Stateless — no server-side sessions, every request must carry a JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Rule order matters: /me (authenticated) must come before /api/auth/** (permitAll)
                 .authorizeHttpRequests(auth -> auth
-                        // /me requires a valid JWT (must be listed BEFORE the wildcard)
                         .requestMatchers("/api/auth/me").authenticated()
-                        // All other auth endpoints (register, login, refresh, logout) are public
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Everything else requires authentication
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
-                // Run our JWT filter before Spring's default username/password filter
+                // JWT filter runs before Spring's UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

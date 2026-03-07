@@ -1,5 +1,6 @@
 package com.loopy.auth.controller;
 
+// Dependencies: @RestController, @RequestMapping, @PostMapping, @GetMapping, @Valid, @RequestBody, @AuthenticationPrincipal, ResponseEntity — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.dto.*;
 import com.loopy.auth.entity.User;
 import com.loopy.auth.service.AuthService;
@@ -49,10 +50,7 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Returns the currently authenticated user's info.
-     * @AuthenticationPrincipal injects the User from SecurityContext (set by JwtAuthenticationFilter).
-     */
+    /** Returns the currently authenticated user's info. */
     @GetMapping("/me")
     public ResponseEntity<UserResponse> me(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(UserResponse.from(user));

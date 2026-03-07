@@ -1,5 +1,6 @@
 package com.loopy.config;
 
+// Dependencies: @RestControllerAdvice, @ExceptionHandler, ResponseEntity, BadCredentialsException, MethodArgumentNotValidException — see DEPENDENCY_GUIDE.md
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
