@@ -15,6 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Core authentication service — handles register, login, token refresh, and logout.
+ * Uses a dual-token strategy:
+ *   - Access token (JWT, short-lived ~15min) for API authorization
+ *   - Refresh token (opaque UUID, long-lived ~30 days) stored in DB for rotation
+ */
 @Service
 public class AuthService {
 
@@ -40,6 +46,7 @@ public class AuthService {
         this.refreshExpirationMs = refreshExpirationMs;
     }
 
+    /** Creates a new user with BCrypt-hashed password, returns both tokens. */
     @Transactional
     public TokenResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
@@ -52,6 +59,10 @@ public class AuthService {
         return createTokens(user);
     }
 
+    /**
+     * Authenticates user via Spring Security's AuthenticationManager.
+     * Throws BadCredentialsException (caught by GlobalExceptionHandler) if password is wrong.
+     */
     @Transactional
     public TokenResponse login(LoginRequest request) {
         authenticationManager.authenticate(
@@ -63,6 +74,10 @@ public class AuthService {
         return createTokens(user);
     }
 
+    /**
+     * Token rotation: validates the old refresh token, revokes it, and issues a new pair.
+     * This prevents replay attacks — each refresh token can only be used once.
+     */
     @Transactional
     public TokenResponse refresh(RefreshRequest request) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(request.refreshToken())
@@ -72,12 +87,14 @@ public class AuthService {
             throw new IllegalArgumentException("Refresh token is expired or revoked");
         }
 
+        // Revoke the old token before issuing new ones
         refreshToken.setRevoked(true);
         refreshTokenRepository.save(refreshToken);
 
         return createTokens(refreshToken.getUser());
     }
 
+    /** Revokes the refresh token so it can't be used again. */
     @Transactional
     public void logout(String refreshTokenValue) {
         refreshTokenRepository.findByToken(refreshTokenValue)
@@ -87,6 +104,7 @@ public class AuthService {
                 });
     }
 
+    /** Generates a new access token (JWT) + refresh token (UUID) pair and persists the refresh token. */
     private TokenResponse createTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshTokenValue = UUID.randomUUID().toString();

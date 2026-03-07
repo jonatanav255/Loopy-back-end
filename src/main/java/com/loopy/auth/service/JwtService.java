@@ -12,12 +12,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * Handles JWT access token creation and validation.
+ * Uses HMAC-SHA256 signing with a secret key from application config.
+ * Access tokens are short-lived (default 15 min) — refresh tokens handle long sessions.
+ */
 @Service
 public class JwtService {
 
     private final SecretKey signingKey;
     private final long accessExpirationMs;
 
+    // Secret and expiration are injected from application.yml (jwt.secret, jwt.access-expiration-ms)
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-expiration-ms}") long accessExpirationMs) {
@@ -25,6 +31,10 @@ public class JwtService {
         this.accessExpirationMs = accessExpirationMs;
     }
 
+    /**
+     * Creates a signed JWT with the user's email as subject and roles as claims.
+     * The frontend sends this in the Authorization header: "Bearer {token}"
+     */
     public String generateAccessToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
@@ -36,10 +46,12 @@ public class JwtService {
                 .compact();
     }
 
+    /** Extracts the email (subject) from a JWT token. */
     public String extractEmail(String token) {
         return extractClaims(token).getSubject();
     }
 
+    /** Validates that the token belongs to this user and hasn't expired. */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String email = extractEmail(token);
         return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
@@ -49,6 +61,7 @@ public class JwtService {
         return extractClaims(token).getExpiration().before(new Date());
     }
 
+    /** Parses and verifies the JWT signature, returning the payload claims. */
     private Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(signingKey)
