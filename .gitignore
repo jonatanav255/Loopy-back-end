@@ -4,6 +4,7 @@ target/
 *.log
 .env
 application-local.yml
+.DS_Store
 
 # IDE
 .idea/
