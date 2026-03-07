@@ -1,0 +1,14 @@
+target/
+*.class
+*.jar
+*.log
+.env
+application-local.yml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
