@@ -51,6 +51,11 @@ public class AIService {
                 SPOT_THE_BUG (find the error), FILL_BLANK (complete the ___), EXPLAIN_WHEN (when would you use X?), \
                 COMPARE (how does X differ from Y?)
 
+                Formatting rules:
+                - Wrap any class names, method names, annotations, keywords, or code references in backticks (e.g. `@Service`, `HashMap`, `.getBean()`)
+                - For CODE_OUTPUT and SPOT_THE_BUG cards, put the full code snippet in triple backticks (```code```)
+                - Keep prose text outside of backticks
+
                 Return ONLY a JSON array of exactly %d objects with these fields:
                 - "front": the question
                 - "back": the answer

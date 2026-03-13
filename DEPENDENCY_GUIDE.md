@@ -68,7 +68,7 @@ Injects values from `application.yml` into constructor/field params. `${jwt.secr
 
 ### `@Transactional`
 **From:** `org.springframework.transaction.annotation`
-**Used in:** `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `ReviewService.java`, `EscalationService.java`, `TeachBackService.java`
+**Used in:** `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `ReviewService.java`, `EscalationService.java`, `TeachBackService.java`, `StatsService.java`
 
 Wraps the method in a database transaction. If the method completes normally, the transaction is committed. If it throws an exception, the transaction is rolled back (all DB changes are undone). Ensures partial operations (e.g. user saved but token failed) don't leave the DB in an inconsistent state.
 

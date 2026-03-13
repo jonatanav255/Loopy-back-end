@@ -1,6 +1,6 @@
 package com.loopy.review.service;
 
-// Dependencies: @Service — see DEPENDENCY_GUIDE.md
+// Dependencies: @Service, @Transactional — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.User;
 import com.loopy.card.dto.CardResponse;
 import com.loopy.card.repository.CardRepository;
@@ -10,12 +10,14 @@ import com.loopy.review.repository.ReviewLogRepository;
 import com.loopy.topic.entity.Topic;
 import com.loopy.topic.repository.TopicRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class StatsService {
 
     private final ReviewLogRepository reviewLogRepository;
