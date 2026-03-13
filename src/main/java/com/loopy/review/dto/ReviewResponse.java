@@ -11,6 +11,7 @@ public record ReviewResponse(
         UUID reviewLogId,
         int rating,
         Long responseTimeMs,
+        Integer confidence,
         Instant reviewedAt,
         CardResponse updatedCard
 ) {
@@ -19,6 +20,7 @@ public record ReviewResponse(
                 log.getId(),
                 log.getRating(),
                 log.getResponseTimeMs(),
+                log.getConfidence(),
                 log.getReviewedAt(),
                 CardResponse.from(card)
         );

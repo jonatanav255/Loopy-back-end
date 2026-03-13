@@ -7,5 +7,6 @@ import jakarta.validation.constraints.NotNull;
 
 public record SubmitReviewRequest(
         @NotNull @Min(0) @Max(5) Integer rating,
-        Long responseTimeMs
+        Long responseTimeMs,
+        @Min(1) @Max(3) Integer confidence
 ) {}

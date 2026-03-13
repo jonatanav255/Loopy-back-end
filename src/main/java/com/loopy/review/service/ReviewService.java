@@ -64,7 +64,7 @@ public class ReviewService {
         cardRepository.save(card);
 
         // Save immutable review log
-        ReviewLog log = new ReviewLog(card, user, request.rating(), request.responseTimeMs());
+        ReviewLog log = new ReviewLog(card, user, request.rating(), request.responseTimeMs(), request.confidence());
         reviewLogRepository.save(log);
 
         return ReviewResponse.from(log, card);

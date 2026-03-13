@@ -34,16 +34,20 @@ public class ReviewLog {
     @Column(name = "response_time_ms")
     private Long responseTimeMs;
 
+    @Column
+    private Integer confidence;
+
     @Column(name = "reviewed_at", nullable = false, updatable = false)
     private Instant reviewedAt = Instant.now();
 
     public ReviewLog() {}
 
-    public ReviewLog(Card card, User user, int rating, Long responseTimeMs) {
+    public ReviewLog(Card card, User user, int rating, Long responseTimeMs, Integer confidence) {
         this.card = card;
         this.user = user;
         this.rating = rating;
         this.responseTimeMs = responseTimeMs;
+        this.confidence = confidence;
     }
 
     public UUID getId() { return id; }
@@ -51,5 +55,6 @@ public class ReviewLog {
     public User getUser() { return user; }
     public int getRating() { return rating; }
     public Long getResponseTimeMs() { return responseTimeMs; }
+    public Integer getConfidence() { return confidence; }
     public Instant getReviewedAt() { return reviewedAt; }
 }

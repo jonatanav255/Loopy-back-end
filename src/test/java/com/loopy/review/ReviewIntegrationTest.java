@@ -101,7 +101,7 @@ class ReviewIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new SubmitReviewRequest(4, 1500L))))
+                                new SubmitReviewRequest(4, 1500L, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rating").value(4))
                 .andExpect(jsonPath("$.responseTimeMs").value(1500))

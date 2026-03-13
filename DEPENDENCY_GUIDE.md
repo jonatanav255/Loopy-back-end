@@ -50,7 +50,7 @@ Marks a method whose return value should be registered as a Spring-managed bean.
 
 ### `@Service`
 **From:** `org.springframework.stereotype`
-**Used in:** `JwtService.java`, `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `SM2Service.java`, `ReviewService.java`
+**Used in:** `JwtService.java`, `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `SM2Service.java`, `ReviewService.java`, `StatsService.java`
 
 Specialization of `@Component`. Marks a class as a Spring-managed bean in the service layer. Auto-detected by component scanning and available for injection.
 
@@ -78,19 +78,19 @@ Wraps the method in a database transaction. If the method completes normally, th
 
 ### `@RestController`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Combines `@Controller` + `@ResponseBody`. Every method's return value is serialized directly to JSON (via Jackson) and written to the HTTP response body. Without `@ResponseBody`, Spring would try to resolve return values as view/template names.
 
 ### `@RequestMapping`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Sets the base URL path for all endpoints in the controller. Every method path is relative to this: `@PostMapping("/register")` → `POST /api/auth/register`.
 
 ### `@PostMapping` / `@GetMapping`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Maps HTTP POST/GET requests to a method. Shortcut for `@RequestMapping(method = RequestMethod.POST, path = "...")`.
 
@@ -114,13 +114,13 @@ Extracts a query parameter from the URL (e.g., `/api/concepts?topicId=...`) and 
 
 ### `@RequestBody`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Tells Spring to deserialize the HTTP request body (JSON) into the specified Java object using Jackson. Without it, Spring would try to read parameters from URL query params or form data.
 
 ### `ResponseEntity<T>`
 **From:** `org.springframework.http`
-**Used in:** `AuthController.java`, `GlobalExceptionHandler.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `GlobalExceptionHandler.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Represents a full HTTP response: status code, headers, and body. Gives explicit control over the response (vs. just returning an object, which always returns 200 OK).
 
@@ -257,7 +257,7 @@ Thread-local storage for the current user's authentication. `getContext().getAut
 
 ### `@AuthenticationPrincipal`
 **From:** `org.springframework.security.core.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Extracts the authenticated user object from the `SecurityContext` (set by `JwtAuthenticationFilter`) and injects it as a method parameter. Without this, you'd need to manually call `SecurityContextHolder.getContext().getAuthentication().getPrincipal()`.
 
@@ -333,13 +333,13 @@ Spring parses the method name and auto-generates the SQL query:
 
 ### `@Query`
 **From:** `org.springframework.data.jpa.repository`
-**Used in:** `RefreshTokenRepository.java`, `CardRepository.java`
+**Used in:** `RefreshTokenRepository.java`, `CardRepository.java`, `ReviewLogRepository.java`
 
 When a method name can't express the query you need, write JPQL (Java Persistence Query Language) directly. JPQL uses entity/field names (`RefreshToken`, `rt.user.id`), not table/column names. `:userId` is a named parameter bound to the method argument.
 
 ### `@Param`
 **From:** `org.springframework.data.repository.query`
-**Used in:** `CardRepository.java`
+**Used in:** `CardRepository.java`, `ReviewLogRepository.java`
 
 Binds a method parameter to a named parameter in a `@Query` JPQL string. `@Param("userId") UUID userId` maps to `:userId` in the query.
 
@@ -429,7 +429,7 @@ Registers a listener that intercepts entity lifecycle events (pre-persist, pre-u
 
 ### `@Valid`
 **From:** `jakarta.validation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
 
 Triggers validation on the request body using the constraint annotations on the DTO fields. If validation fails, Spring throws `MethodArgumentNotValidException` before the method body runs.
 

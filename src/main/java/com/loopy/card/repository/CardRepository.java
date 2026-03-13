@@ -20,4 +20,6 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
     @Query("SELECT c FROM Card c WHERE c.user.id = :userId AND c.nextReviewDate <= :today " +
            "ORDER BY c.nextReviewDate ASC, c.easeFactor ASC")
     List<Card> findDueCards(@Param("userId") UUID userId, @Param("today") LocalDate today);
+
+    List<Card> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }
