@@ -35,4 +35,11 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
            "AND c.concept.topic.id IN :topicIds " +
            "ORDER BY c.createdAt DESC")
     List<Card> findCardsByTopics(@Param("userId") UUID userId, @Param("topicIds") List<UUID> topicIds);
+
+    @Query("SELECT c FROM Card c JOIN FETCH c.concept con JOIN FETCH con.topic " +
+           "WHERE c.user.id = :userId " +
+           "AND (LOWER(c.front) LIKE LOWER(:pattern) OR LOWER(c.back) LIKE LOWER(:pattern) " +
+           "OR LOWER(c.hint) LIKE LOWER(:pattern)) " +
+           "ORDER BY c.createdAt DESC")
+    List<Card> searchByUser(@Param("userId") UUID userId, @Param("pattern") String pattern);
 }

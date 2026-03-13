@@ -112,6 +112,12 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    void protectedEndpoint_search_withoutToken_returns403() throws Exception {
+        mockMvc.perform(get("/api/search").param("q", "test"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void protectedEndpoint_withValidToken_returns200() throws Exception {
         // Register to get a valid token
         MvcResult result = mockMvc.perform(post("/api/auth/register")
