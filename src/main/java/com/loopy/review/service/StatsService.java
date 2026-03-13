@@ -7,8 +7,6 @@ import com.loopy.card.repository.CardRepository;
 import com.loopy.review.dto.*;
 import com.loopy.review.entity.ReviewLog;
 import com.loopy.review.repository.ReviewLogRepository;
-import com.loopy.topic.entity.Topic;
-import com.loopy.topic.repository.TopicRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +20,10 @@ public class StatsService {
 
     private final ReviewLogRepository reviewLogRepository;
     private final CardRepository cardRepository;
-    private final TopicRepository topicRepository;
-
     public StatsService(ReviewLogRepository reviewLogRepository,
-                        CardRepository cardRepository,
-                        TopicRepository topicRepository) {
+                        CardRepository cardRepository) {
         this.reviewLogRepository = reviewLogRepository;
         this.cardRepository = cardRepository;
-        this.topicRepository = topicRepository;
     }
 
     /** Returns high-level overview stats for the dashboard. */
@@ -60,50 +54,7 @@ public class StatsService {
         );
     }
 
-    /** Returns accuracy breakdown by topic. */
-    public List<TopicAccuracy> getAccuracyByTopic(User user) {
-        UUID userId = user.getId();
-        List<Topic> topics = topicRepository.findByUserIdOrderByNameAsc(userId);
-        List<ReviewLog> allReviews = reviewLogRepository.findAllByUserIdOrdered(userId);
-
-        // Build a card-to-topic mapping via the card → concept → topic chain
-        Map<UUID, UUID> cardToTopic = new HashMap<>();
-        for (ReviewLog review : allReviews) {
-            UUID cardId = review.getCard().getId();
-            if (!cardToTopic.containsKey(cardId)) {
-                cardToTopic.put(cardId, review.getCard().getConcept().getTopic().getId());
-            }
-        }
-
-        // Group reviews by topic
-        Map<UUID, List<ReviewLog>> byTopic = allReviews.stream()
-                .filter(r -> cardToTopic.containsKey(r.getCard().getId()))
-                .collect(Collectors.groupingBy(r -> cardToTopic.get(r.getCard().getId())));
-
-        Map<UUID, String> topicNames = topics.stream()
-                .collect(Collectors.toMap(Topic::getId, Topic::getName));
-
-        List<TopicAccuracy> result = new ArrayList<>();
-        for (Map.Entry<UUID, List<ReviewLog>> entry : byTopic.entrySet()) {
-            UUID topicId = entry.getKey();
-            List<ReviewLog> reviews = entry.getValue();
-            long total = reviews.size();
-            long passed = reviews.stream().filter(r -> r.getRating() >= 3).count();
-            double acc = total == 0 ? 0.0 : (double) passed / total * 100.0;
-            result.add(new TopicAccuracy(
-                    topicId,
-                    topicNames.getOrDefault(topicId, "Unknown"),
-                    total,
-                    passed,
-                    Math.round(acc * 10.0) / 10.0
-            ));
-        }
-
-        result.sort(Comparator.comparing(TopicAccuracy::topicName));
-        return result;
-    }
-
-    /** Returns daily review counts for a heatmap (last 365 days). */
+/** Returns daily review counts for a heatmap (last 365 days). */
     public List<HeatmapEntry> getHeatmap(User user) {
         List<ReviewLog> reviews = reviewLogRepository.findAllByUserIdOrdered(user.getId());
         LocalDate cutoff = LocalDate.now().minusDays(365);

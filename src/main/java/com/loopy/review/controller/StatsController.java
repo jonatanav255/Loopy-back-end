@@ -5,7 +5,6 @@ import com.loopy.auth.entity.User;
 import com.loopy.review.dto.FragileCard;
 import com.loopy.review.dto.HeatmapEntry;
 import com.loopy.review.dto.StatsOverview;
-import com.loopy.review.dto.TopicAccuracy;
 import com.loopy.review.service.StatsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,13 +30,7 @@ public class StatsController {
         return ResponseEntity.ok(statsService.getOverview(user));
     }
 
-    /** Accuracy breakdown by topic. */
-    @GetMapping("/accuracy")
-    public ResponseEntity<List<TopicAccuracy>> accuracy(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(statsService.getAccuracyByTopic(user));
-    }
-
-    /** Daily review counts for activity heatmap (last 365 days). */
+/** Daily review counts for activity heatmap (last 365 days). */
     @GetMapping("/heatmap")
     public ResponseEntity<List<HeatmapEntry>> heatmap(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(statsService.getHeatmap(user));
