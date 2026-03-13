@@ -13,3 +13,5 @@ application-local.yml
 .settings/
 .project
 .classpath
+
+.claude/
