@@ -8,12 +8,14 @@ import com.loopy.card.entity.Concept;
 import com.loopy.card.entity.ConceptStatus;
 import com.loopy.card.repository.ConceptRepository;
 import com.loopy.card.service.ConceptService;
+import com.loopy.config.ReorderRequest;
 import com.loopy.config.ResourceNotFoundException;
 import com.loopy.topic.entity.Topic;
 import com.loopy.topic.repository.TopicRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -175,6 +177,111 @@ class ConceptServiceTest {
                 () -> conceptService.deleteConcept(conceptId, testUser));
 
         verify(conceptRepository, never()).delete(any());
+    }
+
+    @Test
+    void reorderConcepts_updatesSortOrderCorrectly() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        UUID id3 = UUID.randomUUID();
+
+        Concept c1 = new Concept(testTopic, testUser, "Concept 1", "Notes 1");
+        Concept c2 = new Concept(testTopic, testUser, "Concept 2", "Notes 2");
+        Concept c3 = new Concept(testTopic, testUser, "Concept 3", "Notes 3");
+        setId(c1, id1);
+        setId(c2, id2);
+        setId(c3, id3);
+
+        // Request reorder: c3 first, c1 second, c2 third
+        List<UUID> orderedIds = List.of(id3, id1, id2);
+        ReorderRequest request = new ReorderRequest(orderedIds);
+
+        when(topicRepository.findByIdAndUserId(topicId, userId))
+                .thenReturn(Optional.of(testTopic));
+        when(conceptRepository.findAllByUserIdAndIdIn(userId, orderedIds))
+                .thenReturn(List.of(c1, c2, c3));
+        when(conceptRepository.saveAll(any())).thenReturn(List.of(c3, c1, c2));
+        when(conceptRepository.findByTopicIdAndUserIdOrderBySortOrderAsc(topicId, userId))
+                .thenReturn(List.of(c3, c1, c2));
+
+        List<ConceptResponse> result = conceptService.reorderConcepts(topicId, request, testUser);
+
+        // Verify sort orders were set based on position in orderedIds
+        assertEquals(2, c1.getSortOrder()); // id1 is at index 1 → sortOrder 2
+        assertEquals(3, c2.getSortOrder()); // id2 is at index 2 → sortOrder 3
+        assertEquals(1, c3.getSortOrder()); // id3 is at index 0 → sortOrder 1
+
+        verify(conceptRepository).saveAll(any());
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    void reorderConcepts_topicNotFound_throwsException() {
+        List<UUID> orderedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        ReorderRequest request = new ReorderRequest(orderedIds);
+
+        when(topicRepository.findByIdAndUserId(topicId, userId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> conceptService.reorderConcepts(topicId, request, testUser));
+
+        verify(conceptRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void reorderConcepts_missingConcept_throwsException() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        UUID id3 = UUID.randomUUID();
+
+        Concept c1 = new Concept(testTopic, testUser, "Concept 1", "Notes 1");
+        Concept c2 = new Concept(testTopic, testUser, "Concept 2", "Notes 2");
+        setId(c1, id1);
+        setId(c2, id2);
+
+        // Request has 3 IDs but only 2 concepts exist
+        List<UUID> orderedIds = List.of(id1, id2, id3);
+        ReorderRequest request = new ReorderRequest(orderedIds);
+
+        when(topicRepository.findByIdAndUserId(topicId, userId))
+                .thenReturn(Optional.of(testTopic));
+        when(conceptRepository.findAllByUserIdAndIdIn(userId, orderedIds))
+                .thenReturn(List.of(c1, c2));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> conceptService.reorderConcepts(topicId, request, testUser));
+
+        verify(conceptRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void createConcept_assignsNextSortOrder() {
+        Concept existing1 = new Concept(testTopic, testUser, "Existing 1", "Notes");
+        Concept existing2 = new Concept(testTopic, testUser, "Existing 2", "Notes");
+        setId(existing1, UUID.randomUUID());
+        setId(existing2, UUID.randomUUID());
+        existing1.setSortOrder(1);
+        existing2.setSortOrder(2);
+
+        when(topicRepository.findByIdAndUserId(topicId, userId))
+                .thenReturn(Optional.of(testTopic));
+        when(conceptRepository.findByTopicIdAndUserIdOrderBySortOrderAsc(topicId, userId))
+                .thenReturn(List.of(existing1, existing2));
+
+        ArgumentCaptor<Concept> conceptCaptor = ArgumentCaptor.forClass(Concept.class);
+        when(conceptRepository.save(conceptCaptor.capture())).thenAnswer(invocation -> {
+            Concept c = invocation.getArgument(0);
+            setId(c, UUID.randomUUID());
+            return c;
+        });
+
+        CreateConceptRequest request = new CreateConceptRequest(topicId, "New Concept", "New Notes");
+        conceptService.createConcept(request, testUser);
+
+        Concept savedConcept = conceptCaptor.getValue();
+        assertEquals(3, savedConcept.getSortOrder());
+        assertEquals("New Concept", savedConcept.getTitle());
     }
 
     /** Reflection helper to set UUID id on entities with private id field. */

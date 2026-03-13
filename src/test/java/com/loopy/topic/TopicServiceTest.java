@@ -3,6 +3,7 @@ package com.loopy.topic;
 import com.loopy.auth.entity.User;
 import com.loopy.card.repository.CardRepository;
 import com.loopy.config.ResourceNotFoundException;
+import com.loopy.config.ReorderRequest;
 import com.loopy.topic.dto.CreateTopicRequest;
 import com.loopy.topic.dto.TopicResponse;
 import com.loopy.topic.dto.UpdateTopicRequest;
@@ -187,6 +188,92 @@ class TopicServiceTest {
                 () -> topicService.deleteTopic(topicId, testUser));
 
         verify(topicRepository, never()).delete(any());
+    }
+
+    @Test
+    void reorderTopics_updatesSortOrderCorrectly() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        UUID id3 = UUID.randomUUID();
+
+        Topic t1 = new Topic(testUser, "Topic 1", "Desc 1", "#111111");
+        Topic t2 = new Topic(testUser, "Topic 2", "Desc 2", "#222222");
+        Topic t3 = new Topic(testUser, "Topic 3", "Desc 3", "#333333");
+        setId(t1, id1);
+        setId(t2, id2);
+        setId(t3, id3);
+
+        // Request reorder: t3 first, t1 second, t2 third
+        List<UUID> orderedIds = List.of(id3, id1, id2);
+        ReorderRequest request = new ReorderRequest(orderedIds);
+
+        when(topicRepository.findAllByUserIdAndIdIn(userId, orderedIds))
+                .thenReturn(List.of(t1, t2, t3));
+        when(topicRepository.saveAll(any())).thenReturn(List.of(t3, t1, t2));
+        when(topicRepository.findByUserIdOrderBySortOrderAsc(userId))
+                .thenReturn(List.of(t3, t1, t2));
+        when(cardRepository.countByTopicId(any())).thenReturn(0L);
+
+        List<TopicResponse> result = topicService.reorderTopics(request, testUser);
+
+        // Verify sort orders were set based on position in orderedIds
+        assertEquals(2, t1.getSortOrder()); // id1 is at index 1 → sortOrder 2
+        assertEquals(3, t2.getSortOrder()); // id2 is at index 2 → sortOrder 3
+        assertEquals(1, t3.getSortOrder()); // id3 is at index 0 → sortOrder 1
+
+        verify(topicRepository).saveAll(any());
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    void reorderTopics_missingTopic_throwsException() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        UUID id3 = UUID.randomUUID();
+
+        Topic t1 = new Topic(testUser, "Topic 1", "Desc 1", "#111111");
+        Topic t2 = new Topic(testUser, "Topic 2", "Desc 2", "#222222");
+        setId(t1, id1);
+        setId(t2, id2);
+
+        // Request has 3 IDs but only 2 topics exist
+        List<UUID> orderedIds = List.of(id1, id2, id3);
+        ReorderRequest request = new ReorderRequest(orderedIds);
+
+        when(topicRepository.findAllByUserIdAndIdIn(userId, orderedIds))
+                .thenReturn(List.of(t1, t2));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> topicService.reorderTopics(request, testUser));
+
+        verify(topicRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void createTopic_assignsNextSortOrder() {
+        Topic existing1 = new Topic(testUser, "Existing 1", "Desc", "#111111");
+        Topic existing2 = new Topic(testUser, "Existing 2", "Desc", "#222222");
+        setId(existing1, UUID.randomUUID());
+        setId(existing2, UUID.randomUUID());
+        existing1.setSortOrder(1);
+        existing2.setSortOrder(2);
+
+        when(topicRepository.findByUserIdOrderBySortOrderAsc(userId))
+                .thenReturn(List.of(existing1, existing2));
+
+        ArgumentCaptor<Topic> topicCaptor = ArgumentCaptor.forClass(Topic.class);
+        when(topicRepository.save(topicCaptor.capture())).thenAnswer(invocation -> {
+            Topic t = invocation.getArgument(0);
+            setId(t, UUID.randomUUID());
+            return t;
+        });
+
+        CreateTopicRequest request = new CreateTopicRequest("New Topic", "New Desc", "#AABBCC");
+        topicService.createTopic(request, testUser);
+
+        Topic savedTopic = topicCaptor.getValue();
+        assertEquals(3, savedTopic.getSortOrder());
+        assertEquals("New Topic", savedTopic.getName());
     }
 
     /** Reflection helper to set UUID id on entities with private id field. */
