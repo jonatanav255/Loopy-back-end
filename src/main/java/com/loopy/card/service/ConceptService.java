@@ -55,6 +55,7 @@ public class ConceptService {
 
         concept.setTitle(request.title());
         concept.setNotes(request.notes());
+        concept.setReferenceExplanation(request.referenceExplanation());
 
         return ConceptResponse.from(conceptRepository.save(concept));
     }

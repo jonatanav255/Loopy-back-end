@@ -34,6 +34,9 @@ public class Concept {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "reference_explanation", columnDefinition = "TEXT")
+    private String referenceExplanation;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private ConceptStatus status = ConceptStatus.LEARNING;
@@ -60,11 +63,13 @@ public class Concept {
     public User getUser() { return user; }
     public String getTitle() { return title; }
     public String getNotes() { return notes; }
+    public String getReferenceExplanation() { return referenceExplanation; }
     public ConceptStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 
     public void setTitle(String title) { this.title = title; }
     public void setNotes(String notes) { this.notes = notes; }
+    public void setReferenceExplanation(String referenceExplanation) { this.referenceExplanation = referenceExplanation; }
     public void setStatus(ConceptStatus status) { this.status = status; }
 }

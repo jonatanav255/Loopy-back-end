@@ -10,6 +10,7 @@ import com.loopy.review.dto.ReviewResponse;
 import com.loopy.review.dto.SubmitReviewRequest;
 import com.loopy.review.entity.ReviewLog;
 import com.loopy.review.repository.ReviewLogRepository;
+import com.loopy.teachback.service.EscalationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +24,16 @@ public class ReviewService {
     private final CardRepository cardRepository;
     private final ReviewLogRepository reviewLogRepository;
     private final SM2Service sm2Service;
+    private final EscalationService escalationService;
 
     public ReviewService(CardRepository cardRepository,
                          ReviewLogRepository reviewLogRepository,
-                         SM2Service sm2Service) {
+                         SM2Service sm2Service,
+                         EscalationService escalationService) {
         this.cardRepository = cardRepository;
         this.reviewLogRepository = reviewLogRepository;
         this.sm2Service = sm2Service;
+        this.escalationService = escalationService;
     }
 
     /** Returns all cards due for review today (or overdue). */
@@ -66,6 +70,9 @@ public class ReviewService {
         // Save immutable review log
         ReviewLog log = new ReviewLog(card, user, request.rating(), request.responseTimeMs(), request.confidence());
         reviewLogRepository.save(log);
+
+        // Check if concept should be escalated to teach-back
+        escalationService.checkAndEscalate(card);
 
         return ReviewResponse.from(log, card);
     }

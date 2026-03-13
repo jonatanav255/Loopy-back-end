@@ -10,6 +10,7 @@ public record ConceptResponse(
         UUID topicId,
         String title,
         String notes,
+        String referenceExplanation,
         String status,
         Instant createdAt,
         Instant updatedAt
@@ -20,6 +21,7 @@ public record ConceptResponse(
                 concept.getTopic().getId(),
                 concept.getTitle(),
                 concept.getNotes(),
+                concept.getReferenceExplanation(),
                 concept.getStatus().name(),
                 concept.getCreatedAt(),
                 concept.getUpdatedAt()

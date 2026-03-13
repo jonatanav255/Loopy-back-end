@@ -6,5 +6,6 @@ import jakarta.validation.constraints.Size;
 
 public record UpdateConceptRequest(
         @NotBlank @Size(max = 200) String title,
-        String notes
+        String notes,
+        String referenceExplanation
 ) {}
