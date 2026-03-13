@@ -1,8 +1,9 @@
 package com.loopy.config;
 
-// Dependencies: @RestControllerAdvice, @ExceptionHandler, ResponseEntity, BadCredentialsException, MethodArgumentNotValidException — see DEPENDENCY_GUIDE.md
+// Dependencies: @RestControllerAdvice, @ExceptionHandler, ResponseEntity, BadCredentialsException, MethodArgumentNotValidException, HttpMessageNotReadableException — see DEPENDENCY_GUIDE.md
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse("Validation failed");
         return ResponseEntity.badRequest().body(Map.of("error", message));
+    }
+
+    /** Catches malformed or unreadable request bodies (e.g. invalid JSON). */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleUnreadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(Map.of("error", "Malformed request body"));
     }
 
     /** Catches resource-not-found errors (entity missing or not owned by user). */

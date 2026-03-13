@@ -142,6 +142,12 @@ Marks a method as a handler for a specific exception type. When that exception i
 
 Thrown when `@Valid` validation fails on a `@RequestBody` parameter. Contains a `BindingResult` with all field errors. `getBindingResult().getFieldErrors()` returns the list of validation failures, each with the field name and the constraint message.
 
+### `HttpMessageNotReadableException`
+**From:** `org.springframework.http.converter`
+**Used in:** `GlobalExceptionHandler.java`
+
+Thrown when Spring cannot deserialize the HTTP request body — e.g. malformed JSON, empty body, or type mismatches. Caught by the global exception handler to return a 400 with a clear error message instead of a 500.
+
 ### `OncePerRequestFilter`
 **From:** `org.springframework.web.filter`
 **Used in:** `JwtAuthenticationFilter.java`
