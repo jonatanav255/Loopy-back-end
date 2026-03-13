@@ -39,11 +39,20 @@ public class ReviewService {
         this.escalationService = escalationService;
     }
 
-    /** Returns all cards due for review today (or overdue). */
-    public List<CardResponse> getDueCards(User user) {
-        return cardRepository.findDueCards(user.getId(), LocalDate.now()).stream()
-                .map(CardResponse::from)
-                .toList();
+    /** Returns cards due for review today (or overdue), optionally filtered by topics and limited. */
+    public List<CardResponse> getDueCards(User user, List<UUID> topicIds, Integer limit) {
+        List<Card> cards;
+        if (topicIds != null && !topicIds.isEmpty()) {
+            cards = cardRepository.findDueCardsByTopics(user.getId(), LocalDate.now(), topicIds);
+        } else {
+            cards = cardRepository.findDueCards(user.getId(), LocalDate.now());
+        }
+
+        var stream = cards.stream().map(CardResponse::from);
+        if (limit != null && limit > 0) {
+            stream = stream.limit(limit);
+        }
+        return stream.toList();
     }
 
     /** Submits a review: runs the card's scheduling algorithm, updates state, saves log. */

@@ -1,6 +1,6 @@
 package com.loopy.review.controller;
 
-// Dependencies: @RestController, @RequestMapping, @GetMapping, @PostMapping, @Valid, @RequestBody, @PathVariable, @AuthenticationPrincipal, ResponseEntity — see DEPENDENCY_GUIDE.md
+// Dependencies: @RestController, @RequestMapping, @GetMapping, @PostMapping, @Valid, @RequestBody, @RequestParam, @PathVariable, @AuthenticationPrincipal, ResponseEntity — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.User;
 import com.loopy.card.dto.CardResponse;
 import com.loopy.review.dto.ReviewResponse;
@@ -24,10 +24,13 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    /** Returns cards due for review today. */
+    /** Returns cards due for review today, optionally filtered by topics and limited. */
     @GetMapping("/today")
-    public ResponseEntity<List<CardResponse>> today(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(reviewService.getDueCards(user));
+    public ResponseEntity<List<CardResponse>> today(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) List<UUID> topicIds,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(reviewService.getDueCards(user, topicIds, limit));
     }
 
     /** Submits a review for a card, applying SM-2 scheduling. */

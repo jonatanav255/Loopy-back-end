@@ -36,7 +36,7 @@ public class AIController {
     public ResponseEntity<List<GeneratedCard>> generateCards(
             @Valid @RequestBody GenerateCardsRequest request,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(aiService.generateCards(request.conceptId(), request.content(), user));
+        return ResponseEntity.ok(aiService.generateCards(request.conceptId(), request.content(), request.numCards(), user));
     }
 
     /** Evaluate a teach-back explanation using AI. */

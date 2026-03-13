@@ -39,19 +39,19 @@ public class AIService {
     /**
      * Generates flashcards from provided content using Claude.
      */
-    public List<GeneratedCard> generateCards(UUID conceptId, String content, User user) {
-        Concept concept = conceptRepository.findByIdAndUserId(conceptId, user.getId())
+    public List<GeneratedCard> generateCards(UUID conceptId, String content, int numCards, User user) {
+        Concept concept = conceptRepository.findWithTopicByIdAndUserId(conceptId, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Concept not found"));
 
         String system = """
-                You are a flashcard generation assistant. Generate concise, effective flashcards from the provided content.
+                You are a flashcard generation assistant. Generate exactly %d concise, effective flashcards from the provided content.
                 Each card should test a single concept. Use active recall principles.
 
                 Card types: STANDARD (question/answer), CODE_OUTPUT (what does this code output?), \
                 SPOT_THE_BUG (find the error), FILL_BLANK (complete the ___), EXPLAIN_WHEN (when would you use X?), \
                 COMPARE (how does X differ from Y?)
 
-                Return ONLY a JSON array of objects with these fields:
+                Return ONLY a JSON array of exactly %d objects with these fields:
                 - "front": the question
                 - "back": the answer
                 - "cardType": one of the card types above
@@ -59,7 +59,7 @@ public class AIService {
 
                 Topic: %s
                 Concept: %s
-                """.formatted(concept.getTopic().getName(), concept.getTitle());
+                """.formatted(numCards, numCards, concept.getTopic().getName(), concept.getTitle());
 
         String response = anthropicClient.sendMessage(generationModel, system, content, 4096);
 
@@ -70,7 +70,7 @@ public class AIService {
      * Evaluates a teach-back explanation using Claude.
      */
     public TeachBackEvaluation evaluateTeachBack(UUID conceptId, String userExplanation, User user) {
-        Concept concept = conceptRepository.findByIdAndUserId(conceptId, user.getId())
+        Concept concept = conceptRepository.findWithTopicByIdAndUserId(conceptId, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Concept not found"));
 
         String referenceInfo = concept.getReferenceExplanation() != null

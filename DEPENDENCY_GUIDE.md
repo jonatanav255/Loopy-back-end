@@ -108,7 +108,7 @@ Extracts a value from a URI template variable (e.g., `/api/topics/{id}`) and bin
 
 ### `@RequestParam`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `ConceptController.java`, `CardController.java`, `TeachBackController.java`
+**Used in:** `ConceptController.java`, `CardController.java`, `ReviewController.java`, `TeachBackController.java`
 
 Extracts a query parameter from the URL (e.g., `/api/concepts?topicId=...`) and binds it to a method parameter.
 
