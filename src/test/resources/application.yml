@@ -15,3 +15,8 @@ jwt:
   secret: test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256!!
   access-expiration-ms: 900000
   refresh-expiration-ms: 2592000000
+
+anthropic:
+  api-key:
+  generation-model: claude-haiku-4-5-20251001
+  evaluation-model: claude-sonnet-4-5-20250514
