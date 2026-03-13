@@ -11,5 +11,5 @@ import java.util.UUID;
 public record GenerateCardsRequest(
         @NotNull UUID conceptId,
         @NotBlank String content,
-        @Min(1) @Max(10) int numCards
+        @Min(1) @Max(20) int numCards
 ) {}
