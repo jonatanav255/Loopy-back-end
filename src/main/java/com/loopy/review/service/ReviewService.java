@@ -55,6 +55,17 @@ public class ReviewService {
         return stream.toList();
     }
 
+    /** Returns all cards for practice (ignores scheduling), optionally filtered by topics. */
+    public List<CardResponse> getPracticeCards(User user, List<UUID> topicIds) {
+        List<Card> cards;
+        if (topicIds != null && !topicIds.isEmpty()) {
+            cards = cardRepository.findCardsByTopics(user.getId(), topicIds);
+        } else {
+            cards = cardRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        }
+        return cards.stream().map(CardResponse::from).toList();
+    }
+
     /** Submits a review: runs the card's scheduling algorithm, updates state, saves log. */
     @Transactional
     public ReviewResponse submitReview(UUID cardId, SubmitReviewRequest request, User user) {

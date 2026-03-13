@@ -11,16 +11,22 @@ public record TopicResponse(
         String description,
         String colorHex,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        long cardCount
 ) {
     public static TopicResponse from(Topic topic) {
+        return from(topic, 0);
+    }
+
+    public static TopicResponse from(Topic topic, long cardCount) {
         return new TopicResponse(
                 topic.getId(),
                 topic.getName(),
                 topic.getDescription(),
                 topic.getColorHex(),
                 topic.getCreatedAt(),
-                topic.getUpdatedAt()
+                topic.getUpdatedAt(),
+                cardCount
         );
     }
 }

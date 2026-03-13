@@ -33,6 +33,14 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getDueCards(user, topicIds, limit));
     }
 
+    /** Returns all cards for practice mode (ignores scheduling), optionally filtered by topics. */
+    @GetMapping("/practice")
+    public ResponseEntity<List<CardResponse>> practice(
+            @RequestParam(required = false) List<UUID> topicIds,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(reviewService.getPracticeCards(user, topicIds));
+    }
+
     /** Submits a review for a card, applying SM-2 scheduling. */
     @PostMapping("/{cardId}")
     public ResponseEntity<ReviewResponse> submit(@PathVariable UUID cardId,

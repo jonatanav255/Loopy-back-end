@@ -27,4 +27,12 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
     List<Card> findDueCardsByTopics(@Param("userId") UUID userId, @Param("today") LocalDate today, @Param("topicIds") List<UUID> topicIds);
 
     List<Card> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.concept.topic.id = :topicId")
+    long countByTopicId(@Param("topicId") UUID topicId);
+
+    @Query("SELECT c FROM Card c WHERE c.user.id = :userId " +
+           "AND c.concept.topic.id IN :topicIds " +
+           "ORDER BY c.createdAt DESC")
+    List<Card> findCardsByTopics(@Param("userId") UUID userId, @Param("topicIds") List<UUID> topicIds);
 }

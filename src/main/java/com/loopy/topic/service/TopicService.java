@@ -2,6 +2,7 @@ package com.loopy.topic.service;
 
 // Dependencies: @Service, @Transactional — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.User;
+import com.loopy.card.repository.CardRepository;
 import com.loopy.config.ResourceNotFoundException;
 import com.loopy.topic.dto.CreateTopicRequest;
 import com.loopy.topic.dto.TopicResponse;
@@ -17,14 +18,16 @@ import java.util.List;
 public class TopicService {
 
     private final TopicRepository topicRepository;
+    private final CardRepository cardRepository;
 
-    public TopicService(TopicRepository topicRepository) {
+    public TopicService(TopicRepository topicRepository, CardRepository cardRepository) {
         this.topicRepository = topicRepository;
+        this.cardRepository = cardRepository;
     }
 
     public List<TopicResponse> getTopics(User user) {
         return topicRepository.findByUserIdOrderByNameAsc(user.getId()).stream()
-                .map(TopicResponse::from)
+                .map(t -> TopicResponse.from(t, cardRepository.countByTopicId(t.getId())))
                 .toList();
     }
 
