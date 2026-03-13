@@ -12,6 +12,7 @@ public record ConceptResponse(
         String notes,
         String referenceExplanation,
         String status,
+        int sortOrder,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -23,6 +24,7 @@ public record ConceptResponse(
                 concept.getNotes(),
                 concept.getReferenceExplanation(),
                 concept.getStatus().name(),
+                concept.getSortOrder(),
                 concept.getCreatedAt(),
                 concept.getUpdatedAt()
         );

@@ -10,6 +10,7 @@ public record TopicResponse(
         String name,
         String description,
         String colorHex,
+        int sortOrder,
         Instant createdAt,
         Instant updatedAt,
         long cardCount
@@ -24,6 +25,7 @@ public record TopicResponse(
                 topic.getName(),
                 topic.getDescription(),
                 topic.getColorHex(),
+                topic.getSortOrder(),
                 topic.getCreatedAt(),
                 topic.getUpdatedAt(),
                 cardCount

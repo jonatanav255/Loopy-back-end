@@ -7,6 +7,7 @@ import com.loopy.card.dto.CreateConceptRequest;
 import com.loopy.card.dto.UpdateConceptRequest;
 import com.loopy.card.entity.Concept;
 import com.loopy.card.repository.ConceptRepository;
+import com.loopy.config.ReorderRequest;
 import com.loopy.config.ResourceNotFoundException;
 import com.loopy.topic.entity.Topic;
 import com.loopy.topic.repository.TopicRepository;
@@ -14,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ConceptService {
@@ -28,7 +32,7 @@ public class ConceptService {
     }
 
     public List<ConceptResponse> getConcepts(UUID topicId, User user) {
-        return conceptRepository.findByTopicIdAndUserIdOrderByTitleAsc(topicId, user.getId()).stream()
+        return conceptRepository.findByTopicIdAndUserIdOrderBySortOrderAsc(topicId, user.getId()).stream()
                 .map(ConceptResponse::from)
                 .toList();
     }
@@ -44,7 +48,12 @@ public class ConceptService {
         Topic topic = topicRepository.findByIdAndUserId(request.topicId(), user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
 
+        // Assign next sort order
+        List<Concept> existing = conceptRepository.findByTopicIdAndUserIdOrderBySortOrderAsc(request.topicId(), user.getId());
+        int nextOrder = existing.isEmpty() ? 1 : existing.get(existing.size() - 1).getSortOrder() + 1;
+
         Concept concept = new Concept(topic, user, request.title(), request.notes());
+        concept.setSortOrder(nextOrder);
         return ConceptResponse.from(conceptRepository.save(concept));
     }
 
@@ -65,5 +74,30 @@ public class ConceptService {
         Concept concept = conceptRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Concept not found"));
         conceptRepository.delete(concept);
+    }
+
+    /** Reorder concepts within a topic based on the ordered list of IDs. */
+    @Transactional
+    public List<ConceptResponse> reorderConcepts(UUID topicId, ReorderRequest request, User user) {
+        // Verify topic belongs to user
+        topicRepository.findByIdAndUserId(topicId, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+
+        List<UUID> orderedIds = request.orderedIds();
+        Map<UUID, Concept> conceptMap = conceptRepository.findAllByUserIdAndIdIn(user.getId(), orderedIds)
+                .stream().collect(Collectors.toMap(Concept::getId, Function.identity()));
+
+        if (conceptMap.size() != orderedIds.size()) {
+            throw new ResourceNotFoundException("One or more concepts not found");
+        }
+
+        for (int i = 0; i < orderedIds.size(); i++) {
+            conceptMap.get(orderedIds.get(i)).setSortOrder(i + 1);
+        }
+        conceptRepository.saveAll(conceptMap.values());
+
+        return conceptRepository.findByTopicIdAndUserIdOrderBySortOrderAsc(topicId, user.getId()).stream()
+                .map(ConceptResponse::from)
+                .toList();
     }
 }

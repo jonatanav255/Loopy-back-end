@@ -50,7 +50,7 @@ Marks a method whose return value should be registered as a Spring-managed bean.
 
 ### `@Service`
 **From:** `org.springframework.stereotype`
-**Used in:** `JwtService.java`, `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `SM2Service.java`, `ReviewService.java`, `StatsService.java`, `EscalationService.java`, `TeachBackService.java`
+**Used in:** `JwtService.java`, `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `SM2Service.java`, `ReviewService.java`, `StatsService.java`, `EscalationService.java`, `TeachBackService.java`, `DataPortService.java`, `SearchService.java`
 
 Specialization of `@Component`. Marks a class as a Spring-managed bean in the service layer. Auto-detected by component scanning and available for injection.
 
@@ -68,7 +68,7 @@ Injects values from `application.yml` into constructor/field params. `${jwt.secr
 
 ### `@Transactional`
 **From:** `org.springframework.transaction.annotation`
-**Used in:** `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `ReviewService.java`, `EscalationService.java`, `TeachBackService.java`, `StatsService.java`
+**Used in:** `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `ReviewService.java`, `EscalationService.java`, `TeachBackService.java`, `StatsService.java`, `DataPortService.java`, `SearchService.java`
 
 Wraps the method in a database transaction. If the method completes normally, the transaction is committed. If it throws an exception, the transaction is rolled back (all DB changes are undone). Ensures partial operations (e.g. user saved but token failed) don't leave the DB in an inconsistent state.
 
@@ -78,19 +78,19 @@ Wraps the method in a database transaction. If the method completes normally, th
 
 ### `@RestController`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`, `DataPortController.java`, `SearchController.java`
 
 Combines `@Controller` + `@ResponseBody`. Every method's return value is serialized directly to JSON (via Jackson) and written to the HTTP response body. Without `@ResponseBody`, Spring would try to resolve return values as view/template names.
 
 ### `@RequestMapping`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`, `DataPortController.java`, `SearchController.java`
 
 Sets the base URL path for all endpoints in the controller. Every method path is relative to this: `@PostMapping("/register")` → `POST /api/auth/register`.
 
 ### `@PostMapping` / `@GetMapping`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`, `DataPortController.java`, `SearchController.java`
 
 Maps HTTP POST/GET requests to a method. Shortcut for `@RequestMapping(method = RequestMethod.POST, path = "...")`.
 
@@ -108,19 +108,19 @@ Extracts a value from a URI template variable (e.g., `/api/topics/{id}`) and bin
 
 ### `@RequestParam`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `ConceptController.java`, `CardController.java`, `ReviewController.java`, `TeachBackController.java`
+**Used in:** `ConceptController.java`, `CardController.java`, `ReviewController.java`, `TeachBackController.java`, `DataPortController.java`, `SearchController.java`
 
 Extracts a query parameter from the URL (e.g., `/api/concepts?topicId=...`) and binds it to a method parameter.
 
 ### `@RequestBody`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`, `DataPortController.java`
 
 Tells Spring to deserialize the HTTP request body (JSON) into the specified Java object using Jackson. Without it, Spring would try to read parameters from URL query params or form data.
 
 ### `ResponseEntity<T>`
 **From:** `org.springframework.http`
-**Used in:** `AuthController.java`, `GlobalExceptionHandler.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`
+**Used in:** `AuthController.java`, `GlobalExceptionHandler.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `DataPortController.java`, `SearchController.java`
 
 Represents a full HTTP response: status code, headers, and body. Gives explicit control over the response (vs. just returning an object, which always returns 200 OK).
 
@@ -257,7 +257,7 @@ Thread-local storage for the current user's authentication. `getContext().getAut
 
 ### `@AuthenticationPrincipal`
 **From:** `org.springframework.security.core.annotation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`, `DataPortController.java`, `SearchController.java`
 
 Extracts the authenticated user object from the `SecurityContext` (set by `JwtAuthenticationFilter`) and injects it as a method parameter. Without this, you'd need to manually call `SecurityContextHolder.getContext().getAuthentication().getPrincipal()`.
 
@@ -333,13 +333,13 @@ Spring parses the method name and auto-generates the SQL query:
 
 ### `@Query`
 **From:** `org.springframework.data.jpa.repository`
-**Used in:** `RefreshTokenRepository.java`, `CardRepository.java`, `ReviewLogRepository.java`
+**Used in:** `RefreshTokenRepository.java`, `CardRepository.java`, `ReviewLogRepository.java`, `TopicRepository.java`, `ConceptRepository.java`
 
 When a method name can't express the query you need, write JPQL (Java Persistence Query Language) directly. JPQL uses entity/field names (`RefreshToken`, `rt.user.id`), not table/column names. `:userId` is a named parameter bound to the method argument.
 
 ### `@Param`
 **From:** `org.springframework.data.repository.query`
-**Used in:** `CardRepository.java`, `ReviewLogRepository.java`
+**Used in:** `CardRepository.java`, `ReviewLogRepository.java`, `TopicRepository.java`, `ConceptRepository.java`
 
 Binds a method parameter to a named parameter in a `@Query` JPQL string. `@Param("userId") UUID userId` maps to `:userId` in the query.
 
@@ -429,13 +429,13 @@ Registers a listener that intercepts entity lifecycle events (pre-persist, pre-u
 
 ### `@Valid`
 **From:** `jakarta.validation`
-**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`, `StatsController.java`, `TeachBackController.java`, `DataPortController.java`, `ImportRequest.java`, `ImportTopicData.java`, `ImportConceptData.java`
 
 Triggers validation on the request body using the constraint annotations on the DTO fields. If validation fails, Spring throws `MethodArgumentNotValidException` before the method body runs.
 
 ### `@NotBlank`
 **From:** `jakarta.validation.constraints`
-**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `CreateCardRequest.java`, `UpdateCardRequest.java`, `SubmitTeachBackRequest.java`
+**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `CreateCardRequest.java`, `UpdateCardRequest.java`, `SubmitTeachBackRequest.java`, `ImportTopicData.java`, `ImportConceptData.java`, `ImportCardData.java`
 
 Rejects null, empty `""`, and whitespace-only `"   "` strings.
 
@@ -447,15 +447,21 @@ Validates the string matches email format (contains `@` and domain).
 
 ### `@Size(min, max)`
 **From:** `jakarta.validation.constraints`
-**Used in:** `RegisterRequest.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`
+**Used in:** `RegisterRequest.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `ImportTopicData.java`, `ImportConceptData.java`
 
 Validates string length is within bounds. Violations throw `MethodArgumentNotValidException` (caught by `GlobalExceptionHandler`).
 
 ### `@NotNull`
 **From:** `jakarta.validation.constraints`
-**Used in:** `CreateConceptRequest.java`, `CreateCardRequest.java`, `SubmitReviewRequest.java`, `SubmitTeachBackRequest.java`
+**Used in:** `CreateConceptRequest.java`, `CreateCardRequest.java`, `SubmitReviewRequest.java`, `SubmitTeachBackRequest.java`, `ImportRequest.java`
 
 Rejects null values. Unlike `@NotBlank`, doesn't check for empty or whitespace — use for non-string types (UUIDs, integers).
+
+### `@NotEmpty`
+**From:** `jakarta.validation.constraints`
+**Used in:** `ImportRequest.java`
+
+Rejects null and empty collections/strings. Unlike `@NotBlank`, works on collections (e.g. `List`) — ensures the list has at least one element.
 
 ### `@Min` / `@Max`
 **From:** `jakarta.validation.constraints`
@@ -527,6 +533,6 @@ Represents the remaining filters in the chain. Calling `filterChain.doFilter()` 
 
 ### `record`
 **From:** Java language feature
-**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `TokenResponse.java`, `UserResponse.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `TopicResponse.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `ConceptResponse.java`, `CreateCardRequest.java`, `UpdateCardRequest.java`, `CardResponse.java`, `SubmitReviewRequest.java`, `ReviewResponse.java`, `SM2Result.java`
+**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `TokenResponse.java`, `UserResponse.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `TopicResponse.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `ConceptResponse.java`, `CreateCardRequest.java`, `UpdateCardRequest.java`, `CardResponse.java`, `SubmitReviewRequest.java`, `ReviewResponse.java`, `SM2Result.java`, `ExportResponse.java`, `ExportTopicData.java`, `ExportConceptData.java`, `ExportCardData.java`, `ImportRequest.java`, `ImportTopicData.java`, `ImportConceptData.java`, `ImportCardData.java`, `ImportResponse.java`, `SearchResponse.java`, `TopicSearchResult.java`, `ConceptSearchResult.java`, `CardSearchResult.java`
 
 Compact class that auto-generates constructor, getters, `equals()`, `hashCode()`, and `toString()`. Fields are final and immutable. Ideal for DTOs.

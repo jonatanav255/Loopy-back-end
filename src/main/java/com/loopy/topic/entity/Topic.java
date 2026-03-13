@@ -32,6 +32,9 @@ public class Topic {
     @Column(name = "color_hex", length = 7)
     private String colorHex = "#6366F1";
 
+    @Column(name = "sort_order", nullable = false)
+    private int sortOrder = 0;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -56,8 +59,10 @@ public class Topic {
     public String getColorHex() { return colorHex; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public int getSortOrder() { return sortOrder; }
 
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
     public void setColorHex(String colorHex) { this.colorHex = colorHex; }
+    public void setSortOrder(int sortOrder) { this.sortOrder = sortOrder; }
 }

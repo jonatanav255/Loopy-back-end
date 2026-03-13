@@ -41,6 +41,9 @@ public class Concept {
     @Column(nullable = false, length = 30)
     private ConceptStatus status = ConceptStatus.LEARNING;
 
+    @Column(name = "sort_order", nullable = false)
+    private int sortOrder = 0;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -67,9 +70,11 @@ public class Concept {
     public ConceptStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public int getSortOrder() { return sortOrder; }
 
     public void setTitle(String title) { this.title = title; }
     public void setNotes(String notes) { this.notes = notes; }
     public void setReferenceExplanation(String referenceExplanation) { this.referenceExplanation = referenceExplanation; }
     public void setStatus(ConceptStatus status) { this.status = status; }
+    public void setSortOrder(int sortOrder) { this.sortOrder = sortOrder; }
 }

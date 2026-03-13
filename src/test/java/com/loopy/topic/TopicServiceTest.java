@@ -92,7 +92,7 @@ class TopicServiceTest {
         setId(topic1, UUID.randomUUID());
         setId(topic2, UUID.randomUUID());
 
-        when(topicRepository.findByUserIdOrderByNameAsc(userId)).thenReturn(List.of(topic1, topic2));
+        when(topicRepository.findByUserIdOrderBySortOrderAsc(userId)).thenReturn(List.of(topic1, topic2));
         when(cardRepository.countByTopicId(any())).thenReturn(0L);
 
         List<TopicResponse> topics = topicService.getTopics(testUser);
@@ -101,7 +101,7 @@ class TopicServiceTest {
         assertEquals("Topic 1", topics.get(0).name());
         assertEquals("Topic 2", topics.get(1).name());
 
-        verify(topicRepository).findByUserIdOrderByNameAsc(userId);
+        verify(topicRepository).findByUserIdOrderBySortOrderAsc(userId);
     }
 
     @Test

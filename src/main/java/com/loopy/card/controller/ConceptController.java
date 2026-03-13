@@ -6,6 +6,7 @@ import com.loopy.card.dto.ConceptResponse;
 import com.loopy.card.dto.CreateConceptRequest;
 import com.loopy.card.dto.UpdateConceptRequest;
 import com.loopy.card.service.ConceptService;
+import com.loopy.config.ReorderRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,12 @@ public class ConceptController {
                                        @AuthenticationPrincipal User user) {
         conceptService.deleteConcept(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/reorder")
+    public ResponseEntity<List<ConceptResponse>> reorder(@RequestParam UUID topicId,
+                                                         @Valid @RequestBody ReorderRequest request,
+                                                         @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(conceptService.reorderConcepts(topicId, request, user));
     }
 }

@@ -100,7 +100,7 @@ class ConceptServiceTest {
         setId(c1, UUID.randomUUID());
         setId(c2, UUID.randomUUID());
 
-        when(conceptRepository.findByTopicIdAndUserIdOrderByTitleAsc(topicId, userId))
+        when(conceptRepository.findByTopicIdAndUserIdOrderBySortOrderAsc(topicId, userId))
                 .thenReturn(List.of(c1, c2));
 
         List<ConceptResponse> concepts = conceptService.getConcepts(topicId, testUser);

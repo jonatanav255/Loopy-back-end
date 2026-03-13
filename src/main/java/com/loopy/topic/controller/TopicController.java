@@ -2,6 +2,7 @@ package com.loopy.topic.controller;
 
 // Dependencies: @RestController, @RequestMapping, @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, @Valid, @RequestBody, @PathVariable, @AuthenticationPrincipal, ResponseEntity — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.User;
+import com.loopy.config.ReorderRequest;
 import com.loopy.topic.dto.CreateTopicRequest;
 import com.loopy.topic.dto.TopicResponse;
 import com.loopy.topic.dto.UpdateTopicRequest;
@@ -54,5 +55,11 @@ public class TopicController {
                                        @AuthenticationPrincipal User user) {
         topicService.deleteTopic(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/reorder")
+    public ResponseEntity<List<TopicResponse>> reorder(@Valid @RequestBody ReorderRequest request,
+                                                       @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(topicService.reorderTopics(request, user));
     }
 }
