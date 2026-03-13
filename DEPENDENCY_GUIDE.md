@@ -50,7 +50,7 @@ Marks a method whose return value should be registered as a Spring-managed bean.
 
 ### `@Service`
 **From:** `org.springframework.stereotype`
-**Used in:** `JwtService.java`, `AuthService.java`
+**Used in:** `JwtService.java`, `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `SM2Service.java`, `ReviewService.java`
 
 Specialization of `@Component`. Marks a class as a Spring-managed bean in the service layer. Auto-detected by component scanning and available for injection.
 
@@ -68,7 +68,7 @@ Injects values from `application.yml` into constructor/field params. `${jwt.secr
 
 ### `@Transactional`
 **From:** `org.springframework.transaction.annotation`
-**Used in:** `AuthService.java`
+**Used in:** `AuthService.java`, `TopicService.java`, `ConceptService.java`, `CardService.java`, `ReviewService.java`
 
 Wraps the method in a database transaction. If the method completes normally, the transaction is committed. If it throws an exception, the transaction is rolled back (all DB changes are undone). Ensures partial operations (e.g. user saved but token failed) don't leave the DB in an inconsistent state.
 
@@ -78,31 +78,49 @@ Wraps the method in a database transaction. If the method completes normally, th
 
 ### `@RestController`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Combines `@Controller` + `@ResponseBody`. Every method's return value is serialized directly to JSON (via Jackson) and written to the HTTP response body. Without `@ResponseBody`, Spring would try to resolve return values as view/template names.
 
 ### `@RequestMapping`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Sets the base URL path for all endpoints in the controller. Every method path is relative to this: `@PostMapping("/register")` → `POST /api/auth/register`.
 
 ### `@PostMapping` / `@GetMapping`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Maps HTTP POST/GET requests to a method. Shortcut for `@RequestMapping(method = RequestMethod.POST, path = "...")`.
 
+### `@PutMapping` / `@DeleteMapping`
+**From:** `org.springframework.web.bind.annotation`
+**Used in:** `TopicController.java`, `ConceptController.java`, `CardController.java`
+
+Maps HTTP PUT/DELETE requests to a method. Used for update and delete operations in CRUD controllers.
+
+### `@PathVariable`
+**From:** `org.springframework.web.bind.annotation`
+**Used in:** `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
+
+Extracts a value from a URI template variable (e.g., `/api/topics/{id}`) and binds it to a method parameter.
+
+### `@RequestParam`
+**From:** `org.springframework.web.bind.annotation`
+**Used in:** `ConceptController.java`, `CardController.java`
+
+Extracts a query parameter from the URL (e.g., `/api/concepts?topicId=...`) and binds it to a method parameter.
+
 ### `@RequestBody`
 **From:** `org.springframework.web.bind.annotation`
-**Used in:** `AuthController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Tells Spring to deserialize the HTTP request body (JSON) into the specified Java object using Jackson. Without it, Spring would try to read parameters from URL query params or form data.
 
 ### `ResponseEntity<T>`
 **From:** `org.springframework.http`
-**Used in:** `AuthController.java`, `GlobalExceptionHandler.java`
+**Used in:** `AuthController.java`, `GlobalExceptionHandler.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Represents a full HTTP response: status code, headers, and body. Gives explicit control over the response (vs. just returning an object, which always returns 200 OK).
 
@@ -239,7 +257,7 @@ Thread-local storage for the current user's authentication. `getContext().getAut
 
 ### `@AuthenticationPrincipal`
 **From:** `org.springframework.security.core.annotation`
-**Used in:** `AuthController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Extracts the authenticated user object from the `SecurityContext` (set by `JwtAuthenticationFilter`) and injects it as a method parameter. Without this, you'd need to manually call `SecurityContextHolder.getContext().getAuthentication().getPrincipal()`.
 
@@ -300,13 +318,13 @@ Activates the auditing infrastructure so `@CreatedDate` and `@LastModifiedDate` 
 
 ### `JpaRepository<Entity, ID>`
 **From:** `org.springframework.data.jpa.repository`
-**Used in:** `UserRepository.java`, `RefreshTokenRepository.java`
+**Used in:** `UserRepository.java`, `RefreshTokenRepository.java`, `TopicRepository.java`, `ConceptRepository.java`, `CardRepository.java`, `ReviewLogRepository.java`
 
 Spring-provided interface that gives full CRUD operations (`save`, `findById`, `findAll`, `delete`, etc.) without writing any SQL or implementation code. Spring Data auto-generates the implementation class at startup. The two type params are `<EntityType, PrimaryKeyType>`.
 
 ### Derived Query Methods
 **From:** Spring Data JPA (convention)
-**Used in:** `UserRepository.java`, `RefreshTokenRepository.java`
+**Used in:** `UserRepository.java`, `RefreshTokenRepository.java`, `TopicRepository.java`, `ConceptRepository.java`, `CardRepository.java`, `ReviewLogRepository.java`
 
 Spring parses the method name and auto-generates the SQL query:
 - `findByEmail(String email)` → `SELECT * FROM users WHERE email = ?`
@@ -315,9 +333,15 @@ Spring parses the method name and auto-generates the SQL query:
 
 ### `@Query`
 **From:** `org.springframework.data.jpa.repository`
-**Used in:** `RefreshTokenRepository.java`
+**Used in:** `RefreshTokenRepository.java`, `CardRepository.java`
 
 When a method name can't express the query you need, write JPQL (Java Persistence Query Language) directly. JPQL uses entity/field names (`RefreshToken`, `rt.user.id`), not table/column names. `:userId` is a named parameter bound to the method argument.
+
+### `@Param`
+**From:** `org.springframework.data.repository.query`
+**Used in:** `CardRepository.java`
+
+Binds a method parameter to a named parameter in a `@Query` JPQL string. `@Param("userId") UUID userId` maps to `:userId` in the query.
 
 ### `@Modifying`
 **From:** `org.springframework.data.jpa.repository`
@@ -327,13 +351,13 @@ Required on `@Query` methods that change data (UPDATE, DELETE). Without it, Spri
 
 ### `@CreatedDate` / `@LastModifiedDate`
 **From:** `org.springframework.data.annotation`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`
 
 `@CreatedDate` — the `AuditingEntityListener` sets this to the current timestamp when the entity is first persisted (INSERT). `@LastModifiedDate` — set on every persist and update, so it always reflects the last change.
 
 ### `AuditingEntityListener`
 **From:** `org.springframework.data.jpa.domain.support`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`
 
 JPA entity listener that reads `@CreatedDate`/`@LastModifiedDate` fields and sets their values automatically on persist and update events. Activated by `@EnableJpaAuditing`.
 
@@ -343,31 +367,31 @@ JPA entity listener that reads `@CreatedDate`/`@LastModifiedDate` fields and set
 
 ### `@Entity`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Marks a class as a JPA entity, meaning Hibernate will manage its lifecycle (persist, merge, remove) and map it to a database table.
 
 ### `@Table`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Specifies the DB table name. Without this, JPA defaults to the class name. `@Table(name = "users")` avoids using "User", which is a reserved keyword in PostgreSQL.
 
 ### `@Id`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Marks a field as the primary key of the entity.
 
 ### `@GeneratedValue`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Tells Hibernate to auto-generate the value on insert. `GenerationType.UUID` makes Hibernate generate a random UUID before persisting.
 
 ### `@Column`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Maps a field to a DB column. Options:
 - `nullable = false` — adds a NOT NULL constraint
@@ -377,25 +401,25 @@ Maps a field to a DB column. Options:
 
 ### `@Enumerated(EnumType.STRING)`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`
+**Used in:** `User.java`, `Concept.java`, `Card.java`
 
 Stores the enum as its name string (`"USER"`, `"ADMIN"`) instead of its ordinal index (0, 1). STRING is safer because reordering or adding enum values won't corrupt existing data. JPA defaults to ORDINAL without this.
 
 ### `@ManyToOne`
 **From:** `jakarta.persistence`
-**Used in:** `RefreshToken.java`
+**Used in:** `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Defines a many-to-one relationship: many RefreshTokens belong to one User. `FetchType.LAZY` means the User is NOT loaded from DB until you call `getUser()`, avoiding unnecessary JOINs. Default is `FetchType.EAGER` which always JOINs.
 
 ### `@JoinColumn`
 **From:** `jakarta.persistence`
-**Used in:** `RefreshToken.java`
+**Used in:** `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`, `ReviewLog.java`
 
 Specifies the foreign key column in the owning table that references the related table. `@JoinColumn(name = "user_id")` maps to `user_id UUID REFERENCES users(id)`.
 
 ### `@EntityListeners`
 **From:** `jakarta.persistence`
-**Used in:** `User.java`, `RefreshToken.java`
+**Used in:** `User.java`, `RefreshToken.java`, `Topic.java`, `Concept.java`, `Card.java`
 
 Registers a listener that intercepts entity lifecycle events (pre-persist, pre-update). Used with `AuditingEntityListener.class` to auto-set `@CreatedDate`/`@LastModifiedDate`.
 
@@ -405,13 +429,13 @@ Registers a listener that intercepts entity lifecycle events (pre-persist, pre-u
 
 ### `@Valid`
 **From:** `jakarta.validation`
-**Used in:** `AuthController.java`
+**Used in:** `AuthController.java`, `TopicController.java`, `ConceptController.java`, `CardController.java`, `ReviewController.java`
 
 Triggers validation on the request body using the constraint annotations on the DTO fields. If validation fails, Spring throws `MethodArgumentNotValidException` before the method body runs.
 
 ### `@NotBlank`
 **From:** `jakarta.validation.constraints`
-**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`
+**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `CreateCardRequest.java`, `UpdateCardRequest.java`
 
 Rejects null, empty `""`, and whitespace-only `"   "` strings.
 
@@ -423,9 +447,21 @@ Validates the string matches email format (contains `@` and domain).
 
 ### `@Size(min, max)`
 **From:** `jakarta.validation.constraints`
-**Used in:** `RegisterRequest.java`
+**Used in:** `RegisterRequest.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`
 
 Validates string length is within bounds. Violations throw `MethodArgumentNotValidException` (caught by `GlobalExceptionHandler`).
+
+### `@NotNull`
+**From:** `jakarta.validation.constraints`
+**Used in:** `CreateConceptRequest.java`, `CreateCardRequest.java`, `SubmitReviewRequest.java`
+
+Rejects null values. Unlike `@NotBlank`, doesn't check for empty or whitespace — use for non-string types (UUIDs, integers).
+
+### `@Min` / `@Max`
+**From:** `jakarta.validation.constraints`
+**Used in:** `SubmitReviewRequest.java`
+
+Validates a numeric value is within bounds. `@Min(0) @Max(5)` constrains SM-2 ratings to the 0–5 range.
 
 ---
 
@@ -491,6 +527,6 @@ Represents the remaining filters in the chain. Calling `filterChain.doFilter()` 
 
 ### `record`
 **From:** Java language feature
-**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `TokenResponse.java`, `UserResponse.java`
+**Used in:** `RegisterRequest.java`, `LoginRequest.java`, `RefreshRequest.java`, `TokenResponse.java`, `UserResponse.java`, `CreateTopicRequest.java`, `UpdateTopicRequest.java`, `TopicResponse.java`, `CreateConceptRequest.java`, `UpdateConceptRequest.java`, `ConceptResponse.java`, `CreateCardRequest.java`, `UpdateCardRequest.java`, `CardResponse.java`, `SubmitReviewRequest.java`, `ReviewResponse.java`, `SM2Result.java`
 
 Compact class that auto-generates constructor, getters, `equals()`, `hashCode()`, and `toString()`. Fields are final and immutable. Ideal for DTOs.
