@@ -81,7 +81,7 @@ class AIIntegrationTest {
                         .header("Authorization", auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new GenerateCardsRequest(conceptId, "Some learning content"))))
+                                new GenerateCardsRequest(conceptId, "Some learning content", 3))))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -100,7 +100,7 @@ class AIIntegrationTest {
         mockMvc.perform(post("/api/ai/generate-cards")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new GenerateCardsRequest(conceptId, "content"))))
+                                new GenerateCardsRequest(conceptId, "content", 3))))
                 .andExpect(status().isForbidden());
     }
 }
