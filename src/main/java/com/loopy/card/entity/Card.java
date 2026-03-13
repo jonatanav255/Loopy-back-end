@@ -2,6 +2,7 @@ package com.loopy.card.entity;
 
 // Dependencies: @Entity, @Table, @Id, @GeneratedValue, @Column, @ManyToOne, @JoinColumn, @Enumerated, @EntityListeners, @CreatedDate, @LastModifiedDate — see DEPENDENCY_GUIDE.md
 import com.loopy.auth.entity.User;
+import com.loopy.review.service.SchedulingAlgorithm;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -59,6 +60,16 @@ public class Card {
     @Column(name = "last_review_date")
     private LocalDate lastReviewDate;
 
+    @Column(nullable = false)
+    private double stability = 0;
+
+    @Column(nullable = false)
+    private double difficulty = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "scheduling_algorithm", nullable = false, length = 10)
+    private SchedulingAlgorithm schedulingAlgorithm = SchedulingAlgorithm.SM2;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -93,6 +104,9 @@ public class Card {
     public int getIntervalDays() { return intervalDays; }
     public LocalDate getNextReviewDate() { return nextReviewDate; }
     public LocalDate getLastReviewDate() { return lastReviewDate; }
+    public double getStability() { return stability; }
+    public double getDifficulty() { return difficulty; }
+    public SchedulingAlgorithm getSchedulingAlgorithm() { return schedulingAlgorithm; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 
@@ -106,4 +120,7 @@ public class Card {
     public void setIntervalDays(int intervalDays) { this.intervalDays = intervalDays; }
     public void setNextReviewDate(LocalDate nextReviewDate) { this.nextReviewDate = nextReviewDate; }
     public void setLastReviewDate(LocalDate lastReviewDate) { this.lastReviewDate = lastReviewDate; }
+    public void setStability(double stability) { this.stability = stability; }
+    public void setDifficulty(double difficulty) { this.difficulty = difficulty; }
+    public void setSchedulingAlgorithm(SchedulingAlgorithm schedulingAlgorithm) { this.schedulingAlgorithm = schedulingAlgorithm; }
 }

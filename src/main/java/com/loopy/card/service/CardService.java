@@ -8,6 +8,7 @@ import com.loopy.card.dto.UpdateCardRequest;
 import com.loopy.card.entity.Card;
 import com.loopy.card.entity.CardType;
 import com.loopy.card.entity.Concept;
+import com.loopy.review.service.SchedulingAlgorithm;
 import com.loopy.card.repository.CardRepository;
 import com.loopy.card.repository.ConceptRepository;
 import com.loopy.config.ResourceNotFoundException;
@@ -78,5 +79,13 @@ public class CardService {
         Card card = cardRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
         cardRepository.delete(card);
+    }
+
+    @Transactional
+    public CardResponse switchAlgorithm(UUID id, SchedulingAlgorithm algorithm, User user) {
+        Card card = cardRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
+        card.setSchedulingAlgorithm(algorithm);
+        return CardResponse.from(cardRepository.save(card));
     }
 }

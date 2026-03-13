@@ -24,15 +24,18 @@ public class ReviewService {
     private final CardRepository cardRepository;
     private final ReviewLogRepository reviewLogRepository;
     private final SM2Service sm2Service;
+    private final FSRSService fsrsService;
     private final EscalationService escalationService;
 
     public ReviewService(CardRepository cardRepository,
                          ReviewLogRepository reviewLogRepository,
                          SM2Service sm2Service,
+                         FSRSService fsrsService,
                          EscalationService escalationService) {
         this.cardRepository = cardRepository;
         this.reviewLogRepository = reviewLogRepository;
         this.sm2Service = sm2Service;
+        this.fsrsService = fsrsService;
         this.escalationService = escalationService;
     }
 
@@ -43,7 +46,7 @@ public class ReviewService {
                 .toList();
     }
 
-    /** Submits a review: runs SM-2, updates card state, saves review log. */
+    /** Submits a review: runs the card's scheduling algorithm, updates state, saves log. */
     @Transactional
     public ReviewResponse submitReview(UUID cardId, SubmitReviewRequest request, User user) {
         Card card = cardRepository.findByIdAndUserId(cardId, user.getId())
@@ -51,20 +54,16 @@ public class ReviewService {
 
         LocalDate today = LocalDate.now();
 
-        SM2Result result = sm2Service.calculate(
-                card.getRepetitionCount(),
-                card.getEaseFactor(),
-                card.getIntervalDays(),
-                request.rating(),
-                today
-        );
+        SchedulingResult result = schedule(card, request.rating(), today);
 
-        // Update card with new SM-2 state
+        // Update card with new state
         card.setRepetitionCount(result.repetitionCount());
         card.setEaseFactor(result.easeFactor());
         card.setIntervalDays(result.intervalDays());
         card.setNextReviewDate(result.nextReviewDate());
         card.setLastReviewDate(today);
+        card.setStability(result.stability());
+        card.setDifficulty(result.difficulty());
         cardRepository.save(card);
 
         // Save immutable review log
@@ -75,5 +74,36 @@ public class ReviewService {
         escalationService.checkAndEscalate(card);
 
         return ReviewResponse.from(log, card);
+    }
+
+    /** Routes to the correct algorithm based on the card's scheduling setting. */
+    private SchedulingResult schedule(Card card, int rating, LocalDate today) {
+        if (card.getSchedulingAlgorithm() == SchedulingAlgorithm.FSRS) {
+            return fsrsService.calculate(
+                    card.getStability(),
+                    card.getDifficulty(),
+                    card.getIntervalDays(),
+                    rating,
+                    card.getRepetitionCount(),
+                    today
+            );
+        }
+
+        // Default: SM-2
+        SM2Result sm2 = sm2Service.calculate(
+                card.getRepetitionCount(),
+                card.getEaseFactor(),
+                card.getIntervalDays(),
+                rating,
+                today
+        );
+        return new SchedulingResult(
+                sm2.repetitionCount(),
+                sm2.easeFactor(),
+                sm2.intervalDays(),
+                sm2.nextReviewDate(),
+                card.getStability(),
+                card.getDifficulty()
+        );
     }
 }

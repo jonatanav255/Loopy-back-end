@@ -6,6 +6,7 @@ import com.loopy.card.dto.CardResponse;
 import com.loopy.card.dto.CreateCardRequest;
 import com.loopy.card.dto.UpdateCardRequest;
 import com.loopy.card.service.CardService;
+import com.loopy.review.service.SchedulingAlgorithm;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,13 @@ public class CardController {
                                        @AuthenticationPrincipal User user) {
         cardService.deleteCard(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Switch a card's scheduling algorithm (SM2 or FSRS). */
+    @PutMapping("/{id}/algorithm")
+    public ResponseEntity<CardResponse> switchAlgorithm(@PathVariable UUID id,
+                                                         @RequestParam SchedulingAlgorithm algorithm,
+                                                         @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(cardService.switchAlgorithm(id, algorithm, user));
     }
 }

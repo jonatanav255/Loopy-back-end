@@ -19,6 +19,9 @@ public record CardResponse(
         int intervalDays,
         LocalDate nextReviewDate,
         LocalDate lastReviewDate,
+        double stability,
+        double difficulty,
+        String schedulingAlgorithm,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -36,6 +39,9 @@ public record CardResponse(
                 card.getIntervalDays(),
                 card.getNextReviewDate(),
                 card.getLastReviewDate(),
+                card.getStability(),
+                card.getDifficulty(),
+                card.getSchedulingAlgorithm().name(),
                 card.getCreatedAt(),
                 card.getUpdatedAt()
         );
