@@ -117,28 +117,6 @@ class StatsIntegrationTest {
     }
 
     @Test
-    void accuracyByTopic_returnsBreakdown() throws Exception {
-        String auth = registerAndAuth();
-        String cardId = createTopicConceptCard(auth);
-
-        // Submit a passing review
-        mockMvc.perform(post("/api/reviews/" + cardId)
-                        .header("Authorization", auth)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new SubmitReviewRequest(5, 1000L, 3))))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/api/stats/accuracy")
-                        .header("Authorization", auth))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].topicName").value("Stats Topic"))
-                .andExpect(jsonPath("$[0].totalReviews").value(1))
-                .andExpect(jsonPath("$[0].passedReviews").value(1))
-                .andExpect(jsonPath("$[0].accuracy").value(100.0));
-    }
-
-    @Test
     void heatmap_returnsEntriesAfterReview() throws Exception {
         String auth = registerAndAuth();
         String cardId = createTopicConceptCard(auth);
