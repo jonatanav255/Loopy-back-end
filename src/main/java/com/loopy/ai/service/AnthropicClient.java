@@ -1,6 +1,6 @@
 package com.loopy.ai.service;
 
-// Dependencies: @Service, @Value, RestClient — see DEPENDENCY_GUIDE.md
+// Dependencies: @Service, @Value, RestClient, ObjectMapper, JsonNode, MediaType — see DEPENDENCY_GUIDE.md
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;

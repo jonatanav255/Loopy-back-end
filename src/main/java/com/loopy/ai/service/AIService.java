@@ -1,6 +1,6 @@
 package com.loopy.ai.service;
 
-// Dependencies: @Service, @Value — see DEPENDENCY_GUIDE.md
+// Dependencies: @Service, @Value, ObjectMapper, TypeReference — see DEPENDENCY_GUIDE.md
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopy.ai.dto.GeneratedCard;

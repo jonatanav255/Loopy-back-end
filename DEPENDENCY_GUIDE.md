@@ -535,6 +535,54 @@ Represents the remaining filters in the chain. Calling `filterChain.doFilter()` 
 
 ---
 
+## Jackson (com.fasterxml.jackson)
+
+### `ObjectMapper`
+**From:** `com.fasterxml.jackson.databind`
+**Used in:** `AIService.java`, `AnthropicClient.java`
+
+Jackson's main class for reading and writing JSON. `readValue(json, Class)` deserializes JSON into a Java object. `writeValueAsString(obj)` serializes an object to JSON. Spring Boot auto-configures a global `ObjectMapper` bean.
+
+### `TypeReference`
+**From:** `com.fasterxml.jackson.core.type`
+**Used in:** `AIService.java`
+
+Captures generic type information at runtime so Jackson can deserialize into parameterized types like `List<GeneratedCard>`. Java erases generics at runtime, so `new TypeReference<List<GeneratedCard>>() {}` preserves the type via an anonymous subclass.
+
+### `JsonNode`
+**From:** `com.fasterxml.jackson.databind`
+**Used in:** `AnthropicClient.java`
+
+Tree-model representation of JSON. `objectMapper.readTree(json)` parses JSON into a `JsonNode` tree that can be navigated with `.get("field")`, `.isArray()`, `.asText()`, etc. Useful when you only need specific fields from a large JSON response.
+
+---
+
+## Spring Web Client
+
+### `RestClient`
+**From:** `org.springframework.web.client`
+**Used in:** `AnthropicClient.java`
+
+Spring 6.1+ fluent HTTP client. `RestClient.builder()` creates a configurable client with default headers, base URL, etc. Supports `.post()`, `.get()`, etc. with a fluent API: `.contentType()` → `.body()` → `.retrieve()` → `.body(Class)`.
+
+### `MediaType`
+**From:** `org.springframework.http`
+**Used in:** `AnthropicClient.java`
+
+Constants for HTTP Content-Type values. `MediaType.APPLICATION_JSON` represents `application/json`. Used with `RestClient` to set the request content type.
+
+---
+
+## Spring Data JPA (additional)
+
+### `@EntityGraph`
+**From:** `org.springframework.data.jpa.repository`
+**Used in:** `ConceptRepository.java`
+
+Overrides the default fetch strategy for a query method. `@EntityGraph(attributePaths = "topic")` tells JPA to eagerly load the `topic` relationship in a single JOIN query, avoiding a `LazyInitializationException` when accessing `concept.getTopic()` outside a transaction.
+
+---
+
 ## Java Records (Java 17)
 
 ### `record`

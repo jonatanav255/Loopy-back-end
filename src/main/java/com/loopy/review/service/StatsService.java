@@ -31,8 +31,8 @@ public class StatsService {
         UUID userId = user.getId();
         LocalDate today = LocalDate.now();
 
-        int cardsDue = cardRepository.findDueCards(userId, today).size();
-        int totalCards = cardRepository.findByUserIdOrderByCreatedAtDesc(userId).size();
+        int cardsDue = (int) cardRepository.countDueCards(userId, today);
+        int totalCards = (int) cardRepository.countByUserId(userId);
 
         Instant dayStart = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Instant dayEnd = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();

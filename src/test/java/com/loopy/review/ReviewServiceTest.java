@@ -235,6 +235,89 @@ class ReviewServiceTest {
         assertEquals(testUser, savedLog.getUser());
     }
 
+    // --- getPracticeCards ---
+
+    @Test
+    void getPracticeCards_noTopicFilter_returnsAllCards() {
+        Card card1 = new Card(testConcept, testUser, "Q1", "A1", CardType.STANDARD, null, null);
+        Card card2 = new Card(testConcept, testUser, "Q2", "A2", CardType.CODE_OUTPUT, null, null);
+        setId(card1, UUID.randomUUID());
+        setId(card2, UUID.randomUUID());
+
+        when(cardRepository.findByUserIdOrderByCreatedAtDesc(userId))
+                .thenReturn(List.of(card1, card2));
+
+        List<CardResponse> result = reviewService.getPracticeCards(testUser, null);
+
+        assertEquals(2, result.size());
+        assertEquals("Q1", result.get(0).front());
+        assertEquals("Q2", result.get(1).front());
+        verify(cardRepository).findByUserIdOrderByCreatedAtDesc(userId);
+        verify(cardRepository, never()).findCardsByTopics(any(), any());
+    }
+
+    @Test
+    void getPracticeCards_withTopicFilter_filtersCards() {
+        UUID topicId = UUID.randomUUID();
+        Card card = new Card(testConcept, testUser, "Topic Q", "Topic A", CardType.STANDARD, null, null);
+        setId(card, UUID.randomUUID());
+
+        when(cardRepository.findCardsByTopics(userId, List.of(topicId)))
+                .thenReturn(List.of(card));
+
+        List<CardResponse> result = reviewService.getPracticeCards(testUser, List.of(topicId));
+
+        assertEquals(1, result.size());
+        assertEquals("Topic Q", result.get(0).front());
+        verify(cardRepository).findCardsByTopics(userId, List.of(topicId));
+        verify(cardRepository, never()).findByUserIdOrderByCreatedAtDesc(any());
+    }
+
+    @Test
+    void getPracticeCards_emptyTopicList_treatedAsNoFilter() {
+        Card card = new Card(testConcept, testUser, "Q", "A", CardType.STANDARD, null, null);
+        setId(card, UUID.randomUUID());
+
+        when(cardRepository.findByUserIdOrderByCreatedAtDesc(userId))
+                .thenReturn(List.of(card));
+
+        List<CardResponse> result = reviewService.getPracticeCards(testUser, List.of());
+
+        assertEquals(1, result.size());
+        verify(cardRepository).findByUserIdOrderByCreatedAtDesc(userId);
+        verify(cardRepository, never()).findCardsByTopics(any(), any());
+    }
+
+    @Test
+    void getPracticeCards_noCards_returnsEmptyList() {
+        when(cardRepository.findByUserIdOrderByCreatedAtDesc(userId))
+                .thenReturn(List.of());
+
+        List<CardResponse> result = reviewService.getPracticeCards(testUser, null);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getPracticeCards_multipleTopics_passesAllToRepository() {
+        UUID topicId1 = UUID.randomUUID();
+        UUID topicId2 = UUID.randomUUID();
+        List<UUID> topicIds = List.of(topicId1, topicId2);
+
+        Card card1 = new Card(testConcept, testUser, "Q1", "A1", CardType.STANDARD, null, null);
+        Card card2 = new Card(testConcept, testUser, "Q2", "A2", CardType.STANDARD, null, null);
+        setId(card1, UUID.randomUUID());
+        setId(card2, UUID.randomUUID());
+
+        when(cardRepository.findCardsByTopics(userId, topicIds))
+                .thenReturn(List.of(card1, card2));
+
+        List<CardResponse> result = reviewService.getPracticeCards(testUser, topicIds);
+
+        assertEquals(2, result.size());
+        verify(cardRepository).findCardsByTopics(userId, topicIds);
+    }
+
     /** Reflection helper to set UUID id on entities with private id field. */
     private void setId(Object entity, UUID id) {
         try {

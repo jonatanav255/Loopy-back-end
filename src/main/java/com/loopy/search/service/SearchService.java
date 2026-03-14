@@ -33,7 +33,8 @@ public class SearchService {
 
     @Transactional(readOnly = true)
     public SearchResponse search(String query, User user) {
-        String pattern = "%" + query + "%";
+        String escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        String pattern = "%" + escaped + "%";
 
         List<TopicSearchResult> topics = topicRepository
                 .searchByUser(user.getId(), pattern)

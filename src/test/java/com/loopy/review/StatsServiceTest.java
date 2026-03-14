@@ -66,17 +66,10 @@ class StatsServiceTest {
 
     @Test
     void getOverview_calculatesCorrectStats() {
-        // 5 total cards, 3 due today
-        Card card1 = makeCard("Q1");
-        Card card2 = makeCard("Q2");
-        Card card3 = makeCard("Q3");
-        Card card4 = makeCard("Q4");
-        Card card5 = makeCard("Q5");
-
-        when(cardRepository.findDueCards(eq(userId), any(LocalDate.class)))
-                .thenReturn(List.of(card1, card2, card3));
-        when(cardRepository.findByUserIdOrderByCreatedAtDesc(userId))
-                .thenReturn(List.of(card1, card2, card3, card4, card5));
+        when(cardRepository.countDueCards(eq(userId), any(LocalDate.class)))
+                .thenReturn(3L);
+        when(cardRepository.countByUserId(userId))
+                .thenReturn(5L);
         when(reviewLogRepository.countByUserIdAndReviewedAtBetween(eq(userId), any(Instant.class), any(Instant.class)))
                 .thenReturn(10L);
         when(reviewLogRepository.countPassedByUserInRange(eq(userId), any(Instant.class), any(Instant.class)))
@@ -96,10 +89,10 @@ class StatsServiceTest {
 
     @Test
     void getOverview_emptyData_returnsZeros() {
-        when(cardRepository.findDueCards(eq(userId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(cardRepository.findByUserIdOrderByCreatedAtDesc(userId))
-                .thenReturn(Collections.emptyList());
+        when(cardRepository.countDueCards(eq(userId), any(LocalDate.class)))
+                .thenReturn(0L);
+        when(cardRepository.countByUserId(userId))
+                .thenReturn(0L);
         when(reviewLogRepository.countByUserIdAndReviewedAtBetween(eq(userId), any(Instant.class), any(Instant.class)))
                 .thenReturn(0L);
         when(reviewLogRepository.countPassedByUserInRange(eq(userId), any(Instant.class), any(Instant.class)))
@@ -119,10 +112,10 @@ class StatsServiceTest {
 
     @Test
     void getOverview_accuracyCalculation_zeroReviews() {
-        when(cardRepository.findDueCards(eq(userId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(cardRepository.findByUserIdOrderByCreatedAtDesc(userId))
-                .thenReturn(Collections.emptyList());
+        when(cardRepository.countDueCards(eq(userId), any(LocalDate.class)))
+                .thenReturn(0L);
+        when(cardRepository.countByUserId(userId))
+                .thenReturn(0L);
         when(reviewLogRepository.countByUserIdAndReviewedAtBetween(eq(userId), any(Instant.class), any(Instant.class)))
                 .thenReturn(0L);
         when(reviewLogRepository.countPassedByUserInRange(eq(userId), any(Instant.class), any(Instant.class)))

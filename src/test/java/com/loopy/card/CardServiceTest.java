@@ -7,6 +7,7 @@ import com.loopy.card.dto.UpdateCardRequest;
 import com.loopy.card.entity.Card;
 import com.loopy.card.entity.CardType;
 import com.loopy.card.entity.Concept;
+import com.loopy.review.service.SchedulingAlgorithm;
 import com.loopy.card.repository.CardRepository;
 import com.loopy.card.repository.ConceptRepository;
 import com.loopy.card.service.CardService;
@@ -240,6 +241,68 @@ class CardServiceTest {
 
             assertEquals(type.name(), response.cardType());
         }
+    }
+
+    // --- switchAlgorithm ---
+
+    @Test
+    void switchAlgorithm_toFSRS_updatesAndReturns() {
+        UUID cardId = UUID.randomUUID();
+        Card card = new Card(testConcept, testUser, "Q", "A", CardType.STANDARD, null, null);
+        setId(card, cardId);
+
+        when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.of(card));
+        when(cardRepository.save(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CardResponse response = cardService.switchAlgorithm(cardId, SchedulingAlgorithm.FSRS, testUser);
+
+        assertNotNull(response);
+        assertEquals("FSRS", response.schedulingAlgorithm());
+        assertEquals(cardId, response.id());
+        verify(cardRepository).save(card);
+    }
+
+    @Test
+    void switchAlgorithm_toSM2_updatesAndReturns() {
+        UUID cardId = UUID.randomUUID();
+        Card card = new Card(testConcept, testUser, "Q", "A", CardType.STANDARD, null, null);
+        setId(card, cardId);
+        card.setSchedulingAlgorithm(SchedulingAlgorithm.FSRS);
+
+        when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.of(card));
+        when(cardRepository.save(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CardResponse response = cardService.switchAlgorithm(cardId, SchedulingAlgorithm.SM2, testUser);
+
+        assertEquals("SM2", response.schedulingAlgorithm());
+        verify(cardRepository).save(card);
+    }
+
+    @Test
+    void switchAlgorithm_cardNotFound_throwsException() {
+        UUID cardId = UUID.randomUUID();
+        when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> cardService.switchAlgorithm(cardId, SchedulingAlgorithm.FSRS, testUser));
+
+        verify(cardRepository, never()).save(any());
+    }
+
+    @Test
+    void switchAlgorithm_sameAlgorithm_stillSaves() {
+        UUID cardId = UUID.randomUUID();
+        Card card = new Card(testConcept, testUser, "Q", "A", CardType.STANDARD, null, null);
+        setId(card, cardId);
+        // Default is SM2
+
+        when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.of(card));
+        when(cardRepository.save(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CardResponse response = cardService.switchAlgorithm(cardId, SchedulingAlgorithm.SM2, testUser);
+
+        assertEquals("SM2", response.schedulingAlgorithm());
+        verify(cardRepository).save(card);
     }
 
     /** Reflection helper to set UUID id on entities with private id field. */

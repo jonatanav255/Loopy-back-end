@@ -1,6 +1,7 @@
 package com.loopy.auth;
 
 import com.loopy.auth.dto.LoginRequest;
+import com.loopy.auth.dto.RefreshRequest;
 import com.loopy.auth.dto.RegisterRequest;
 import com.loopy.auth.dto.TokenResponse;
 import com.loopy.auth.entity.RefreshToken;
@@ -20,7 +21,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -175,5 +178,111 @@ class AuthServiceTest {
         authService.logout(tokenValue);
 
         verify(refreshTokenRepository, never()).save(any());
+    }
+
+    // --- refresh ---
+
+    @Test
+    void refresh_validToken_revokesOldAndIssuesNewTokens() {
+        String oldTokenValue = "old-refresh-token";
+        User user = new User("user@example.com", "hashed");
+        setId(user, UUID.randomUUID());
+
+        RefreshToken oldToken = new RefreshToken(user, oldTokenValue, Instant.now().plusMillis(86400000));
+        setId(oldToken, UUID.randomUUID());
+
+        RefreshRequest request = new RefreshRequest(oldTokenValue);
+
+        when(refreshTokenRepository.findByToken(oldTokenValue)).thenReturn(Optional.of(oldToken));
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.generateAccessToken(user)).thenReturn("new-access-token");
+        when(jwtService.getAccessExpirationMs()).thenReturn(900000L);
+
+        TokenResponse response = authService.refresh(request);
+
+        assertNotNull(response);
+        assertEquals("new-access-token", response.accessToken());
+        assertNotNull(response.refreshToken());
+        assertNotEquals(oldTokenValue, response.refreshToken());
+        assertEquals(900000L, response.expiresIn());
+
+        // Old token should be revoked
+        assertTrue(oldToken.isRevoked());
+
+        // Should save old revoked token + new token
+        verify(refreshTokenRepository, times(2)).save(any(RefreshToken.class));
+    }
+
+    @Test
+    void refresh_invalidToken_throwsException() {
+        RefreshRequest request = new RefreshRequest("nonexistent-token");
+
+        when(refreshTokenRepository.findByToken("nonexistent-token")).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> authService.refresh(request)
+        );
+        assertEquals("Invalid refresh token", exception.getMessage());
+
+        verify(refreshTokenRepository, never()).save(any());
+        verify(jwtService, never()).generateAccessToken(any());
+    }
+
+    @Test
+    void refresh_expiredToken_throwsException() {
+        String tokenValue = "expired-refresh-token";
+        User user = new User("user@example.com", "hashed");
+        setId(user, UUID.randomUUID());
+
+        // Expired token — expiry is in the past
+        RefreshToken expiredToken = new RefreshToken(user, tokenValue, Instant.now().minusMillis(86400000));
+        setId(expiredToken, UUID.randomUUID());
+
+        RefreshRequest request = new RefreshRequest(tokenValue);
+
+        when(refreshTokenRepository.findByToken(tokenValue)).thenReturn(Optional.of(expiredToken));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> authService.refresh(request)
+        );
+        assertEquals("Refresh token is expired or revoked", exception.getMessage());
+
+        verify(jwtService, never()).generateAccessToken(any());
+    }
+
+    @Test
+    void refresh_revokedToken_throwsException() {
+        String tokenValue = "revoked-refresh-token";
+        User user = new User("user@example.com", "hashed");
+        setId(user, UUID.randomUUID());
+
+        RefreshToken revokedToken = new RefreshToken(user, tokenValue, Instant.now().plusMillis(86400000));
+        setId(revokedToken, UUID.randomUUID());
+        revokedToken.setRevoked(true);
+
+        RefreshRequest request = new RefreshRequest(tokenValue);
+
+        when(refreshTokenRepository.findByToken(tokenValue)).thenReturn(Optional.of(revokedToken));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> authService.refresh(request)
+        );
+        assertEquals("Refresh token is expired or revoked", exception.getMessage());
+
+        verify(jwtService, never()).generateAccessToken(any());
+    }
+
+    /** Reflection helper to set UUID id on entities with private id field. */
+    private void setId(Object entity, UUID id) {
+        try {
+            java.lang.reflect.Field idField = entity.getClass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(entity, id);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set ID via reflection", e);
+        }
     }
 }

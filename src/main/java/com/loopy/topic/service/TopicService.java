@@ -39,7 +39,7 @@ public class TopicService {
     public TopicResponse getTopic(UUID id, User user) {
         Topic topic = topicRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
-        return TopicResponse.from(topic);
+        return TopicResponse.from(topic, cardRepository.countByTopicId(topic.getId()));
     }
 
     @Transactional

@@ -31,6 +31,12 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
     @Query("SELECT COUNT(c) FROM Card c WHERE c.concept.topic.id = :topicId")
     long countByTopicId(@Param("topicId") UUID topicId);
 
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.user.id = :userId AND c.nextReviewDate <= :today")
+    long countDueCards(@Param("userId") UUID userId, @Param("today") LocalDate today);
+
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.user.id = :userId")
+    long countByUserId(@Param("userId") UUID userId);
+
     @Query("SELECT c FROM Card c WHERE c.user.id = :userId " +
            "AND c.concept.topic.id IN :topicIds " +
            "ORDER BY c.createdAt DESC")
