@@ -583,6 +583,50 @@ Overrides the default fetch strategy for a query method. `@EntityGraph(attribute
 
 ---
 
+## Spring Boot Test (spring-boot-starter-test)
+
+### `@WebMvcTest`
+**From:** `org.springframework.boot.test.autoconfigure.web.servlet`
+**Used in:** `AuthControllerWebMvcTest.java`, `TopicControllerWebMvcTest.java`, `CardControllerWebMvcTest.java`, `ConceptControllerWebMvcTest.java`, `ReviewControllerWebMvcTest.java`, `StatsControllerWebMvcTest.java`, `SearchControllerWebMvcTest.java`, `DataPortControllerWebMvcTest.java`, `TeachBackControllerWebMvcTest.java`, `AIControllerWebMvcTest.java`, `GlobalExceptionHandlerTest.java`
+
+Loads only the web layer (controllers, exception handlers, filters) without starting the full Spring context. Much faster than `@SpringBootTest` because it skips service, repository, and database initialization. Requires `@MockBean` for any service dependencies the controller needs.
+
+### `@MockBean`
+**From:** `org.springframework.boot.test.mock.mockito`
+**Used in:** `AuthControllerWebMvcTest.java`, `TopicControllerWebMvcTest.java`, `CardControllerWebMvcTest.java`, `ConceptControllerWebMvcTest.java`, `ReviewControllerWebMvcTest.java`, `StatsControllerWebMvcTest.java`, `SearchControllerWebMvcTest.java`, `DataPortControllerWebMvcTest.java`, `TeachBackControllerWebMvcTest.java`, `AIControllerWebMvcTest.java`, `GlobalExceptionHandlerTest.java`
+
+Replaces a bean in the Spring application context with a Mockito mock. Unlike `@Mock` (which is pure Mockito), `@MockBean` integrates with Spring's context so the mock is injected into beans that depend on it. Essential for `@WebMvcTest` to provide mock implementations of services.
+
+### `@DataJpaTest`
+**From:** `org.springframework.boot.test.autoconfigure.orm.jpa`
+**Used in:** `TopicRepositoryTest.java`, `ConceptRepositoryTest.java`, `CardRepositoryTest.java`, `ReviewLogRepositoryTest.java`, `UserRepositoryTest.java`, `RefreshTokenRepositoryTest.java`, `TeachBackRepositoryTest.java`
+
+Loads only the JPA layer (entities, repositories, EntityManager) with an embedded H2 database. Each test runs in a transaction that is rolled back after the test, ensuring test isolation. Does not load controllers, services, or security.
+
+### `TestEntityManager`
+**From:** `org.springframework.boot.test.autoconfigure.orm.jpa`
+**Used in:** `TopicRepositoryTest.java`, `ConceptRepositoryTest.java`, `CardRepositoryTest.java`, `ReviewLogRepositoryTest.java`, `UserRepositoryTest.java`, `RefreshTokenRepositoryTest.java`, `TeachBackRepositoryTest.java`
+
+A test-friendly wrapper around JPA's `EntityManager` provided by `@DataJpaTest`. Use `persist()` to insert entities directly (bypassing repository methods), `flush()` to synchronize with the database, and `clear()` to detach all entities from the persistence context. Useful for setting up test data without going through the service layer.
+
+### `@AutoConfigureMockMvc`
+**From:** `org.springframework.boot.test.autoconfigure.web.servlet`
+**Used in:** `AuthControllerWebMvcTest.java`, `TopicControllerWebMvcTest.java`, `CardControllerWebMvcTest.java`, `ConceptControllerWebMvcTest.java`, `ReviewControllerWebMvcTest.java`, `StatsControllerWebMvcTest.java`, `SearchControllerWebMvcTest.java`, `DataPortControllerWebMvcTest.java`, `TeachBackControllerWebMvcTest.java`, `AIControllerWebMvcTest.java`, `GlobalExceptionHandlerTest.java`
+
+Configures `MockMvc` for testing. `addFilters = false` disables the servlet filter chain (including security filters), allowing tests to focus on controller logic without dealing with authentication. Used with `@WebMvcTest`.
+
+---
+
+## Jakarta Validation (Test Usage)
+
+### `Validator` / `ValidatorFactory`
+**From:** `jakarta.validation`
+**Used in:** `ValidationTest.java`
+
+`Validation.buildDefaultValidatorFactory()` creates a `ValidatorFactory` that produces `Validator` instances. `validator.validate(object)` programmatically checks all constraint annotations (`@NotBlank`, `@Size`, `@Email`, etc.) on the object and returns a set of `ConstraintViolation` objects for any failures. Used in tests to verify DTO validation constraints without booting Spring.
+
+---
+
 ## Java Records (Java 17)
 
 ### `record`
